@@ -12,6 +12,7 @@
 *.xwcfg
 *.xwinfo
 *.xwopt
+hw/src/*.txt
 
 # Ignore build directories
 hw/.Xil/
