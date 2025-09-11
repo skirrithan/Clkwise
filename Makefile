@@ -7,8 +7,7 @@ clean:
 	rm -rf ./hw/vivado*
 	rm ./hw/*.txt
 
-vivado:
-	clean
+vivado: clean
 	mkdir ./data
 	cd hw/ && $(VIVADO) -mode batch -source run_vivado.tcl
 
