@@ -7,7 +7,7 @@ import json
 from werkzeug.utils import secure_filename
 from datetime import datetime
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='../frontend/templates')
 app.secret_key = 'clkwise_timing_debugger_2024'
 
 # File upload configuration

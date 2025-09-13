@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLKWISE - Dual AI Analysis Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            color: #fff;
+            line-height: 1.5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            margin-bottom: 15px;
+        }
+        
+        .hero p {
+            color: #737373;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .dual-analysis-info {
+            background: #111;
+            border: 1px solid #333;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+            border-radius: 12px;
+        }
+        
+        .dual-analysis-info h4 {
+            color: #00ff88;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .analysis-pipeline {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .pipeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step-number {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #00ff88;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .pipeline-arrow {
+            color: #00ff88;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .sponsor-badge {
+            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border: 1px solid #333;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .sponsor-badge.cerebras {
+            background: linear-gradient(135deg, #FF1744 0%, #FF5722 100%);
+        }
+        
+        .sponsor-badge.cohere {
+            background: linear-gradient(135deg, #39C5BB 0%, #4DD8CE 100%);
+        }
+        
+        .pipeline-description small {
+            color: #00ff88;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .analyze-btn {
+            background: #00ff88;
+            color: #000;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        
+        .chat-section {
+            background: #111;
+            border: 1px solid #333;
+            margin-top: 40px;
+            border-radius: 12px;
+        }
+        
+        .chat-header {
+            padding: 25px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .chat-header h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .model-selector {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .model-selector h4 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .model-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .model-btn {
+            background: transparent;
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+        }
+        
+        .model-btn.active {
+            opacity: 1;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+        
+        .current-model small {
+            color: #00ff88;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .ai-analysis-section {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid #333;
+        }
+        
+        .ai-analysis-section h2 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #fff;
+        }
+        
+        .analysis-pipeline-status {
+            background: #111;
+            border: 1px solid #333;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            border-radius: 12px;
+        }
+        
+        .pipeline-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .pipeline-step .status {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #00ff88;
+            color: #000;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .analysis-result {
+            background: #111;
+            border: 1px solid #333;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .analysis-result h3 {
+            background: #333;
+            padding: 20px 25px;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 1px solid #333;
+        }
+        
+        .analysis-content {
+            padding: 25px;
+        }
+        
+        .analysis-text {
+            margin-top: 15px;
+            line-height: 1.6;
+            color: #fff;
+            white-space: pre-line;
+        }
+        
+        @media (max-width: 768px) {
+            .analysis-pipeline {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .pipeline-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>CLKWISE AI</h1>
+            <p>AI-POWERED FPGA TIMING ANALYSIS PLATFORM</p>
+        </div>
+        
+        <!-- Upload Section with Dual Analysis Pipeline -->
+        <div class="dual-analysis-info">
+            <h4>DUAL MODEL ANALYSIS PIPELINE:</h4>
+            <div class="analysis-pipeline">
+                <div class="pipeline-step">
+                    <span class="step-number">1</span>
+                    <span class="sponsor-badge cerebras">🚀 CEREBRAS ANALYSIS</span>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <span class="step-number">2</span>
+                    <span class="sponsor-badge cohere">🧠 COHERE REFINEMENT</span>
+                </div>
+            </div>
+            <div class="pipeline-description">
+                <small>COMPREHENSIVE ANALYSIS USING BOTH AI MODELS SEQUENTIALLY</small>
+            </div>
+            <button class="analyze-btn">START DUAL ANALYSIS</button>
+        </div>
+        
+        <!-- Chat Section -->
+        <div class="chat-section">
+            <div class="chat-header">
+                <h3>AI TIMING EXPERT</h3>
+                <p>GET PROFESSIONAL GUIDANCE ON TIMING CLOSURE & FPGA OPTIMIZATION</p>
+                <div class="model-selector">
+                    <h4>CHOOSE AI MODEL:</h4>
+                    <div class="model-buttons">
+                        <button class="model-btn active">
+                            <span class="sponsor-badge cerebras">🚀 CEREBRAS</span>
+                        </button>
+                        <button class="model-btn">
+                            <span class="sponsor-badge cohere">🧠 COHERE</span>
+                        </button>
+                    </div>
+                    <div class="current-model">
+                        <small>USING CEREBRAS INFERENCE</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="ai-analysis-section">
+            <h2>DUAL AI ANALYSIS RESULTS</h2>
+            <div class="analysis-pipeline-status">
+                <div class="pipeline-info">
+                    <span class="pipeline-step" style="position: relative;">
+                        <span class="step-number">1</span>
+                        <span class="sponsor-badge cerebras">🚀 CEREBRAS</span>
+                        <span class="status">✓</span>
+                    </span>
+                    <div class="pipeline-arrow">→</div>
+                    <span class="pipeline-step" style="position: relative;">
+                        <span class="step-number">2</span>
+                        <span class="sponsor-badge cohere">🧠 COHERE</span>
+                        <span class="status">✓</span>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="analysis-result">
+                <h3>COMPREHENSIVE ANALYSIS</h3>
+                <div class="analysis-content">
+                    <div class="sponsor-badge cerebras" style="margin-bottom: 15px;">🚀 CEREBRAS + COHERE SYNTHESIS</div>
+                    <div class="analysis-text"><strong>Comprehensive FPGA Timing Analysis</strong>
+
+<strong>Root Cause Analysis:</strong>
+1. Critical path contains excessive logic levels (8 levels detected)
+2. High routing congestion in center region causing 45% routing delay
+3. Clock skew issues between related flops (0.3ns difference)
+
+<strong>Optimization Strategy:</strong>
+1. <strong>Pipeline Insertion</strong>: Add registers to break critical path into 2-3 stages
+2. <strong>Placement Optimization</strong>: Use AREA_GROUP constraints to cluster logic
+3. <strong>Clock Domain Optimization</strong>: Implement proper synchronizers
+
+<strong>Implementation Priority:</strong>
+1. HIGH: Pipeline critical arithmetic operations
+2. MEDIUM: Optimize placement with LOC constraints  
+3. LOW: Fine-tune I/O timing with OFFSET constraints
+
+<strong>Expected Results:</strong>
+- WNS improvement: +0.8ns to +1.2ns
+- TNS improvement: Complete elimination of violations
+- Timing closure confidence: 95%
+
+<em>Analysis completed using Cerebras + Cohere dual AI pipeline</em></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
