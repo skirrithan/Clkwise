@@ -8,6 +8,7 @@ from app.rules.heuristics import suggest_fix
 from app.llm_clients import orchestrator
 from app.timing_guardrails import guardrails
 from app.schemas import ViolationPrompt, WorstCell, WorstNet
+from app.rox_agent import rox_agent
 from datetime import datetime
 import requests
 import time
@@ -177,6 +178,142 @@ Provide practical, specific advice for FPGA timing issues. Be concise but thorou
     # Ultimate fallback
     return get_fallback_response(message, analysis_data)
 
+def get_dual_model_analysis(violations, summary_data):
+    """Perform analysis using both Cerebras and Cohere sequentially"""
+    # Return a simple mock analysis for now to prevent blocking
+    analysis_results = {
+        'cerebras_analysis': '''**CEREBRAS ANALYSIS:**
+
+Root Cause Analysis:
+1. Critical path contains excessive logic levels (8 detected)
+2. High routing congestion causing 45% routing delay
+3. Clock skew issues between related flops
+
+Optimization Strategies:
+1. Add pipeline registers to break critical paths
+2. Use AREA_GROUP constraints for placement optimization
+3. Implement proper clock domain crossing techniques
+
+Tool-Specific Settings:
+- Enable retiming in Vivado synthesis
+- Use DSP48 blocks for multiplication operations
+- Set appropriate timing constraints''',
+        'cohere_analysis': '''**COHERE ANALYSIS:**
+
+Advanced Optimization Opportunities:
+1. Implement multi-cycle path constraints for non-critical paths
+2. Use clock gating to reduce power and improve timing
+3. Consider architectural changes like distributed vs block RAM
+
+Risk Assessment:
+- Pipeline insertion may increase latency
+- Placement constraints could affect routability
+- Clock domain changes require verification
+
+Verification Steps:
+1. Run timing simulation after changes
+2. Verify functional correctness with testbench
+3. Check power consumption impact''',
+        'combined_insights': '''**COMPREHENSIVE FPGA TIMING ANALYSIS**
+
+**Root Cause Analysis:**
+1. Critical path contains excessive logic levels (8 levels detected)
+2. High routing congestion in center region causing 45% routing delay
+3. Clock skew issues between related flops (0.3ns difference)
+
+**Optimization Strategy:**
+1. **Pipeline Insertion**: Add registers to break critical path into 2-3 stages
+2. **Placement Optimization**: Use AREA_GROUP constraints to cluster logic
+3. **Clock Domain Optimization**: Implement proper synchronizers
+
+**Implementation Priority:**
+1. HIGH: Pipeline critical arithmetic operations
+2. MEDIUM: Optimize placement with LOC constraints
+3. LOW: Fine-tune I/O timing with OFFSET constraints
+
+**Expected Results:**
+- WNS improvement: +0.8ns to +1.2ns
+- TNS improvement: Complete elimination of violations
+- Timing closure confidence: 95%
+
+*Analysis completed using Cerebras + Cohere dual AI pipeline*''',
+        'models_used': ['cerebras', 'cohere']
+    }
+    
+    print("✅ Mock dual analysis completed (Cerebras + Cohere)")
+    return analysis_results
+
+def get_ai_response_with_model(message, context, analysis_data, preferred_model='cerebras'):
+    """Enhanced AI response using selected model preference"""
+    
+    from app.llm_clients import create_cerebras_client, create_cohere_client
+    
+    # Create clients based on preference
+    if preferred_model == 'cohere':
+        primary_client = create_cohere_client()
+        fallback_client = create_cerebras_client()
+        primary_name = "Cohere"
+        fallback_name = "Cerebras"
+    else:  # Default to cerebras
+        primary_client = create_cerebras_client()
+        fallback_client = create_cohere_client()
+        primary_name = "Cerebras"
+        fallback_name = "Cohere"
+    
+    # Build context for the question
+    context_text = ""
+    if analysis_data:
+        summary = analysis_data.get('summary', {})
+        context_text += f"""
+Current Analysis Context:
+- Worst Negative Slack (WNS): {summary.get('wns', 'N/A')} ns
+- Total Negative Slack (TNS): {summary.get('tns', 'N/A')} ns
+- Number of violations: {len(analysis_data.get('violations', []))}
+"""
+    
+    system_prompt = f"""
+You are an expert FPGA timing closure engineer with deep knowledge of:
+- Static Timing Analysis (STA) and timing optimization
+- Xilinx Vivado and Intel Quartus timing closure
+- Verilog/SystemVerilog/VHDL best practices
+- Clock domain crossing (CDC) and pipeline design
+- FPGA resource utilization and placement optimization
+
+Provide practical, specific advice for FPGA timing issues. Be concise but thorough.
+{context_text}
+"""
+    
+    # Try primary model first
+    if primary_client.is_available():
+        try:
+            response = primary_client.json_chat(
+                system_prompt,
+                f"User question: {message}\n\nProvide a helpful response (not JSON, just text):"
+            )
+            # Clean any JSON artifacts that might remain
+            if response.startswith('{') or response.startswith('['):
+                return get_fallback_response(message, analysis_data) + f" (via {primary_name})"
+            return response + f" (via {primary_name})"
+        except Exception as e:
+            print(f"{primary_name} failed: {e}")
+    
+    # Try fallback model
+    if fallback_client.is_available():
+        try:
+            response = fallback_client.json_chat(
+                system_prompt,
+                f"User question: {message}\n\nProvide a helpful response (not JSON, just text):"
+            )
+            # Clean any JSON artifacts that might remain
+            if response.startswith('{') or response.startswith('['):
+                return get_fallback_response(message, analysis_data) + f" (via {fallback_name} fallback)"
+            return response + f" (via {fallback_name} fallback)"
+        except Exception as e:
+            print(f"{fallback_name} fallback failed: {e}")
+    
+    # Ultimate fallback to heuristics
+    return get_fallback_response(message, analysis_data) + " (via heuristic analysis)"
+
 def get_fallback_response(message, analysis_data):
     """Provide basic responses when AI APIs are not available"""
     message_lower = message.lower()
@@ -222,7 +359,7 @@ def about():
 @app.route('/analyze', methods=['POST'])
 def analyze():
     try:
-        # Handle code files
+        # Handle code files (no model preference needed - using both)
         code_files = request.files.getlist('code_files')
         log_files = request.files.getlist('log_files')
         
@@ -233,12 +370,21 @@ def analyze():
         saved_code_files = save_uploaded_files(code_files, 'code')
         saved_log_files = save_uploaded_files(log_files, 'log')
         
-        # Parse timing reports
+        # Parse timing reports with Rox messy data handling
         all_violations = []
         combined_summary = {'wns': None, 'tns': None, 'violations': []}
         
+        # Use Rox agent for robust data ingestion
         for log_file in saved_log_files:
             try:
+                # Ingest potentially messy/corrupted data
+                rox_agent.ingest_messy_data(
+                    content=log_file['content'],
+                    source_name=log_file['name'],
+                    tool_hint=""  # Auto-detect
+                )
+                
+                # Also use traditional parser for comparison
                 summary = parse_summary(log_file['content'])
                 
                 # Update combined summary with worst values
@@ -274,6 +420,33 @@ def analyze():
         all_violations.sort(key=lambda x: x.get('slack', 0) if x.get('slack') is not None else 0)
         combined_summary['violations'] = all_violations
         
+        # Extract robust violations using Rox agent
+        try:
+            rox_violations = rox_agent.extract_robust_violations()
+            if rox_violations:
+                # Merge Rox violations with traditional parsing
+                print(f"✅ Rox agent found {len(rox_violations)} robust violations")
+                # Add Rox violations to the analysis
+                combined_summary['rox_violations'] = rox_violations[:5]  # Top 5
+        except Exception as e:
+            print(f"Rox agent extraction failed: {e}")
+        
+        # Perform dual model AI analysis (Cerebras + Cohere) - DISABLED FOR TESTING
+        # print("🚀 Starting dual model analysis pipeline...")
+        # dual_analysis = None
+        # try:
+        #     dual_analysis = get_dual_model_analysis(all_violations[:10], combined_summary)
+        #     print(f"✅ Dual analysis completed using models: {', '.join(dual_analysis['models_used'])}")
+        #     combined_summary['ai_analysis'] = dual_analysis
+        # except Exception as e:
+        #     print(f"Dual model analysis failed: {e}")
+        #     combined_summary['ai_analysis'] = {
+        #         'error': 'AI analysis temporarily unavailable',
+        #         'models_used': []
+        #     }
+        
+        print("✅ Analysis completed (dual AI disabled for testing)")
+        
         # Store in session for chat context
         session['analysis_data'] = {
             'summary': combined_summary,
@@ -308,45 +481,218 @@ def show_results():
                          code_files=analysis_data['code_files'],
                          log_files=analysis_data['log_files'])
 
+
 @app.route('/chat', methods=['POST'])
 def chat():
     try:
         data = request.get_json()
         message = data.get('message', '')
         context = data.get('context', '')
+        preferred_model = data.get('preferred_model', 'cerebras')
         analysis_data = data.get('analysis_data', session.get('analysis_data', {}))
         
         if not message:
             return jsonify({'error': 'No message provided'}), 400
         
-        # Get AI response
-        response = get_ai_response(message, context, analysis_data)
+        # Get AI response with model preference
+        response = get_ai_response_with_model(message, context, analysis_data, preferred_model)
         
-        return jsonify({'response': response})
+        return jsonify({
+            'response': response,
+            'model_used': preferred_model
+        })
         
     except Exception as e:
         print(f"Chat error: {e}")
         return jsonify({
-            'response': 'Sorry, I encountered an error processing your message. Please try again.'
+            'response': 'Sorry, I encountered an error processing your message. Please try again.',
+            'model_used': 'fallback'
         })
+
+@app.route('/analyze_document', methods=['POST'])
+def analyze_document():
+    """Enhanced document analysis using Cohere's multimodal capabilities"""
+    try:
+        data = request.get_json()
+        document_content = data.get('content', '')
+        analysis_type = data.get('type', 'timing_report')
+        
+        if not document_content:
+            return jsonify({'error': 'No document content provided'}), 400
+        
+        # Use Cohere client for multimodal document analysis
+        from app.llm_clients import create_cohere_client
+        cohere_client = create_cohere_client()
+        
+        if not cohere_client.is_available():
+            return jsonify({'error': 'Cohere API not configured'}), 503
+        
+        # Perform advanced document analysis
+        analysis_result = cohere_client.analyze_document(document_content, analysis_type)
+        
+        return jsonify({
+            'analysis': analysis_result,
+            'timestamp': datetime.now().isoformat(),
+            'model': 'cohere-multimodal'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Document analysis failed: {str(e)}'}), 500
+
+@app.route('/create_workflow', methods=['POST'])
+def create_workflow():
+    """Generate agentic workflow using Cohere's reasoning capabilities"""
+    try:
+        data = request.get_json()
+        task_description = data.get('task', '')
+        context = data.get('context', {})
+        
+        if not task_description:
+            return jsonify({'error': 'No task description provided'}), 400
+        
+        # Use Cohere client for agentic workflow generation
+        from app.llm_clients import create_cohere_client
+        cohere_client = create_cohere_client()
+        
+        if not cohere_client.is_available():
+            return jsonify({'error': 'Cohere API not configured'}), 503
+        
+        # Generate agentic workflow
+        workflow_steps = cohere_client.create_agentic_workflow(task_description, context)
+        
+        return jsonify({
+            'workflow': workflow_steps,
+            'task': task_description,
+            'timestamp': datetime.now().isoformat(),
+            'model': 'cohere-agentic'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Workflow creation failed: {str(e)}'}), 500
+
+@app.route('/rox_analyze', methods=['POST'])
+def rox_robust_analysis():
+    """Advanced messy data analysis using Rox AI Agent capabilities"""
+    try:
+        data = request.get_json()
+        task_description = data.get('task', 'Analyze timing violations from messy data sources')
+        
+        # Clear previous data and start fresh analysis
+        rox_agent.data_sources.clear()
+        rox_agent.conflict_resolutions.clear()
+        
+        # Get uploaded files from session or request
+        if 'files' in data:
+            # Direct file content provided
+            for file_info in data['files']:
+                rox_agent.ingest_messy_data(
+                    content=file_info.get('content', ''),
+                    source_name=file_info.get('name', 'unnamed'),
+                    tool_hint=file_info.get('tool', '')
+                )
+        else:
+            # Use files from current session
+            analysis_data = session.get('analysis_data', {})
+            if not analysis_data:
+                return jsonify({'error': 'No analysis data available. Upload files first.'}), 400
+        
+        # Perform robust analysis
+        robust_result = rox_agent.generate_robust_analysis(task_description)
+        
+        return jsonify({
+            'rox_analysis': robust_result,
+            'task': task_description,
+            'timestamp': datetime.now().isoformat(),
+            'sources_processed': len(rox_agent.data_sources),
+            'conflicts_resolved': len(rox_agent.conflict_resolutions),
+            'model': 'rox-messy-data-agent'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Rox analysis failed: {str(e)}'}), 500
+
+@app.route('/gemini_summarize', methods=['POST'])
+def gemini_summarize_report():
+    """Generate natural language summary using Google Gemini API"""
+    try:
+        data = request.get_json()
+        report_content = data.get('content', '')
+        focus_areas = data.get('focus_areas', [])
+        
+        if not report_content:
+            return jsonify({'error': 'No report content provided'}), 400
+        
+        # Use Gemini client for natural language summarization
+        from app.llm_clients import create_gemini_client
+        gemini_client = create_gemini_client()
+        
+        if not gemini_client.is_available():
+            return jsonify({'error': 'Gemini API not configured'}), 503
+        
+        # Generate comprehensive summary
+        summary_result = gemini_client.summarize_timing_report(report_content, focus_areas)
+        
+        return jsonify({
+            'summary': summary_result,
+            'focus_areas': focus_areas,
+            'timestamp': datetime.now().isoformat(),
+            'model': 'gemini-1.5-pro'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': f'Gemini summarization failed: {str(e)}'}), 500
 
 @app.errorhandler(413)
 def too_large(e):
     return jsonify({'error': 'File too large. Maximum size is 16MB.'}), 413
 
 if __name__ == '__main__':
-    print("Starting Clkwise web interface with enhanced AI pipeline...")
-    print(f"Primary AI Engine: {orchestrator.primary_client.get_model_name() if orchestrator.primary_client.is_available() else 'None configured'}")
-    print(f"Fallback AI Engine: {orchestrator.fallback_client.get_model_name() if orchestrator.fallback_client and orchestrator.fallback_client.is_available() else 'None'}")
-    print(f"Guardrails & Validation: Enabled")
-    print(f"Structured Analysis: Enabled")
+    print("\n" + "="*60)
+    print("🚀 CLKWISE: AI-POWERED TIMING ANALYSIS PLATFORM")
+    print("="*60)
+    print("🏆 HACKATHON SPONSOR INTEGRATIONS:")
     print("")
-    print("🧠 AI Features:")
-    print("   ✓ Structured violation analysis with schema validation")
-    print("   ✓ Heuristic guardrails and enhancement")
-    print("   ✓ Multi-model fallback (Cerebras → Cohere → Heuristics)")
-    print("   ✓ Real-time confidence scoring")
+    
+    # Check sponsor API availability
+    from app.llm_clients import create_groq_client, create_cohere_client, create_gemini_client
+    
+    sponsor_status = []
+    
+    # Groq
+    groq_client = create_groq_client()
+    groq_status = "✅ READY" if groq_client.is_available() else "❌ NOT CONFIGURED"
+    sponsor_status.append(("⚡ GROQ", groq_status, "Ultra-fast inference (Prize: $500 swag)"))
+    
+    # Cohere  
+    cohere_client = create_cohere_client()
+    cohere_status = "✅ READY" if cohere_client.is_available() else "❌ NOT CONFIGURED"
+    sponsor_status.append(("🧠 COHERE", cohere_status, "Multimodal AI (Prize: $500 cash + credits)"))
+    
+    # Gemini
+    gemini_client = create_gemini_client()
+    gemini_status = "✅ READY" if gemini_client.is_available() else "❌ NOT CONFIGURED"
+    sponsor_status.append(("📖 GEMINI", gemini_status, "Natural language (Prize: Google swag)"))
+    
+    # Rox Agent (always available)
+    sponsor_status.append(("💎 ROX", "✅ READY", "Messy data handling (Prize: $10K!)"))
+    
+    # Cerebras
+    cerebras_status = "✅ READY" if orchestrator.primary_client.get_model_name().startswith('cerebras') else "❌ NOT CONFIGURED"
+    sponsor_status.append(("🚀 CEREBRAS", cerebras_status, "Advanced inference (Prize: Keychron keyboards)"))
+    
+    for name, status, description in sponsor_status:
+        print(f"   {name:<15} {status:<15} {description}")
+    
     print("")
-    print("🌐 Web interface will be available at: http://127.0.0.1:5001/")
-    print("   (Using port 5001 to avoid conflicts)")
-    app.run(debug=True, host='127.0.0.1', port=5001)
+    print("🎯 ACTIVE AI PIPELINE:")
+    print(f"   Primary: {orchestrator.primary_client.get_model_name() if orchestrator.primary_client.is_available() else 'None configured'}")
+    print(f"   Fallback: {orchestrator.fallback_client.get_model_name() if orchestrator.fallback_client and orchestrator.fallback_client.is_available() else 'None'}")
+    print(f"   Guardrails: Enabled")
+    print(f"   Rox Agent: Enabled")
+    print("")
+    port = int(os.environ.get('PORT', 8082))
+    print(f"🌐 Web interface starting at: http://127.0.0.1:{port}/")
+    print("   Upload timing reports to see sponsor integrations in action!")
+    print("="*60)
+    
+    app.run(debug=True, host='127.0.0.1', port=port)

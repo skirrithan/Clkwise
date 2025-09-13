@@ -18,7 +18,7 @@
             --text-secondary: #737373;
             --accent-yellow: #FFD700;
             --accent-blue: #0057B8;
-            --accent-green: #05E563;
+            --accent-green: #999999;
             --accent-red: #DC3545;
             --border-color: #333333;
             --hover-bg: rgba(255, 255, 255, 0.07);
@@ -723,6 +723,282 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Sponsor badges styling */
+        .sponsor-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            align-items: center;
+        }
+        
+        .sponsor-badge {
+            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border: 1px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .sponsor-badge:hover {
+            background: linear-gradient(135deg, #333333 0%, #444444 100%);
+            transform: translateY(-1px);
+        }
+        
+        .sponsor-badge.groq {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8E53 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge.cohere {
+            background: linear-gradient(135deg, #39C5BB 0%, #4DD8CE 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge.rox {
+            background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge.gemini {
+            background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge.cerebras {
+            background: linear-gradient(135deg, #FF1744 0%, #FF5722 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge .icon {
+            font-size: 8px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .sponsor-badge {
+                font-size: 8px;
+                padding: 3px 6px;
+            }
+        }
+        
+        /* Model selector styling */
+        .model-selector {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .model-selector h4 {
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .model-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .model-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: all 0.2s ease;
+            opacity: 0.6;
+        }
+        
+        .model-btn:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+        
+        .model-btn.active {
+            opacity: 1;
+        }
+        
+        .model-btn.active .sponsor-badge {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        
+        .current-model {
+            color: var(--text-secondary);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        @media (max-width: 639.98px) {
+            .model-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .model-selector h4 {
+                font-size: 10px;
+            }
+        }
+        
+        /* AI Analysis Section Styling */
+        .ai-analysis-section {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .ai-analysis-section h2 {
+            font-size: 32px;
+            margin-bottom: 32px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+        
+        @media (max-width: 639.98px) {
+            .ai-analysis-section h2 {
+                font-size: 21px;
+                margin-bottom: 25px;
+            }
+        }
+        
+        .analysis-pipeline-status {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .pipeline-info {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .pipeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+        
+        .pipeline-step .step-number {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .pipeline-step .status {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent-green);
+            color: #000;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .pipeline-arrow {
+            color: var(--accent-green);
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .analysis-result {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .analysis-result h3 {
+            background: var(--tertiary-bg);
+            padding: 20px 25px;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .analysis-content {
+            padding: 25px;
+        }
+        
+        .analysis-text {
+            margin-top: 15px;
+            line-height: 1.6;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+        }
+        
+        .analysis-error {
+            background: var(--accent-red);
+            color: #fff;
+            padding: 20px 25px;
+            text-align: center;
+        }
+        
+        .analysis-error h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .analysis-pipeline-status {
+                padding: 20px 15px;
+            }
+            
+            .pipeline-info {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .pipeline-arrow {
+                transform: rotate(90deg);
+                font-size: 24px;
+            }
+            
+            .analysis-content {
+                padding: 20px 15px;
+            }
+            
+            .analysis-result h3 {
+                padding: 15px 20px;
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -782,6 +1058,11 @@
                 {% if violations %}
                 <div class="violations-section">
                     <h2>CRITICAL VIOLATIONS ({{ [violations|length, 10]|min }} OF {{ violations|length }})</h2>
+                    <div class="sponsor-badges">
+                        <span class="sponsor-badge rox"><span class="icon">💎</span> ROX MESSY DATA</span>
+                        <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE MULTIMODAL</span>
+                        <span class="sponsor-badge gemini"><span class="icon">📖</span> GEMINI ANALYSIS</span>
+                    </div>
                     {% for v in violations[:10] %}
                     <div class="violation-item">
                         <div class="violation-header">
@@ -808,6 +1089,10 @@
                         {% if v.tips %}
                         <div class="suggestions">
                             <h4>AI OPTIMIZATION</h4>
+                            <div class="sponsor-badges">
+                                <span class="sponsor-badge rox"><span class="icon">💎</span> USING ROX AGENT</span>
+                                <span class="sponsor-badge groq"><span class="icon">⚡</span> GROQ INFERENCE</span>
+                            </div>
                             <ul>
                             {% for tip in v.tips %}
                                 <li>{{ tip }}</li>
@@ -825,6 +1110,78 @@
                 </div>
                 {% endif %}
                 
+                <!-- Dual AI Analysis Results -->
+                {% if summary.ai_analysis %}
+                <div class="ai-analysis-section">
+                    <h2>DUAL AI ANALYSIS RESULTS</h2>
+                    <div class="analysis-pipeline-status">
+                        <div class="pipeline-info">
+                            <span class="pipeline-step completed">
+                                <span class="step-number">1</span>
+                                <span class="sponsor-badge cerebras"><span class="icon">🚀</span> CEREBRAS</span>
+                                <span class="status">{% if 'cerebras' in summary.ai_analysis.models_used %}✓{% else %}✗{% endif %}</span>
+                            </span>
+                            <div class="pipeline-arrow">→</div>
+                            <span class="pipeline-step completed">
+                                <span class="step-number">2</span>
+                                <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE</span>
+                                <span class="status">{% if 'cohere' in summary.ai_analysis.models_used %}✓{% else %}✗{% endif %}</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    {% if summary.ai_analysis.combined_insights %}
+                    <div class="analysis-result">
+                        <h3>COMPREHENSIVE ANALYSIS</h3>
+                        <div class="analysis-content">
+                            <div class="sponsor-badges">
+                                <span class="sponsor-badge cerebras">🚀 CEREBRAS + COHERE SYNTHESIS</span>
+                            </div>
+                            <div class="analysis-text">
+                                {{ summary.ai_analysis.combined_insights|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Individual Model Results -->
+                    {% if summary.ai_analysis.cerebras_analysis %}
+                    <div class="analysis-result">
+                        <h3>CEREBRAS ANALYSIS</h3>
+                        <div class="analysis-content">
+                            <div class="sponsor-badges">
+                                <span class="sponsor-badge cerebras"><span class="icon">🚀</span> CEREBRAS INFERENCE</span>
+                            </div>
+                            <div class="analysis-text">
+                                {{ summary.ai_analysis.cerebras_analysis|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if summary.ai_analysis.cohere_analysis %}
+                    <div class="analysis-result">
+                        <h3>COHERE ANALYSIS</h3>
+                        <div class="analysis-content">
+                            <div class="sponsor-badges">
+                                <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE REASONING</span>
+                            </div>
+                            <div class="analysis-text">
+                                {{ summary.ai_analysis.cohere_analysis|safe }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                    
+                    {% if summary.ai_analysis.error %}
+                    <div class="analysis-error">
+                        <h3>ANALYSIS STATUS</h3>
+                        <p>{{ summary.ai_analysis.error }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
                 <a href="{{ url_for('upload_form') }}" class="back-btn">ANALYZE NEW DESIGN</a>
             </div>
 
@@ -832,6 +1189,20 @@
                 <div class="chat-header">
                     <h3>AI TIMING EXPERT</h3>
                     <p>GET PROFESSIONAL ANALYSIS & OPTIMIZATION GUIDANCE</p>
+                    <div class="model-selector">
+                        <h4>CHOOSE AI MODEL:</h4>
+                        <div class="model-buttons">
+                            <button class="model-btn active" data-model="cerebras" id="cerebrasBtn">
+                                <span class="sponsor-badge cerebras"><span class="icon">🚀</span> CEREBRAS</span>
+                            </button>
+                            <button class="model-btn" data-model="cohere" id="cohereBtn">
+                                <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE</span>
+                            </button>
+                        </div>
+                        <div class="current-model">
+                            <small id="currentModelText">USING CEREBRAS INFERENCE</small>
+                        </div>
+                    </div>
                 </div>
                 <div class="chat-messages" id="chatMessages">
                     <div class="message ai">
@@ -875,7 +1246,7 @@
             addMessage(message, 'user');
             input.value = '';
             
-            // Send to backend with analysis context
+            // Send to backend with analysis context and selected model
             fetch('/chat', {
                 method: 'POST',
                 headers: {
@@ -884,6 +1255,7 @@
                 body: JSON.stringify({
                     message: message,
                     context: 'results',
+                    preferred_model: selectedModel,
                     analysis_data: {
                         wns: {{ summary.wns|tojson }},
                         tns: {{ summary.tns|tojson }},
@@ -901,14 +1273,79 @@
             });
         }
 
+        let selectedModel = 'cerebras'; // Default model
+        
+        // Model selection functionality
+        function switchModel(model) {
+            selectedModel = model;
+            
+            // Update button states
+            document.querySelectorAll('.model-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(model + 'Btn').classList.add('active');
+            
+            // Update status text
+            const modelText = model === 'cerebras' ? 'USING CEREBRAS INFERENCE' : 'USING COHERE MULTIMODAL';
+            document.getElementById('currentModelText').textContent = modelText;
+            
+            // Visual feedback
+            addMessage(`Switched to ${model.toUpperCase()} model`, 'system');
+        }
+        
         function addMessage(text, sender) {
             const messagesContainer = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${sender}`;
-            messageDiv.innerHTML = `<strong>${sender === 'user' ? 'You' : 'AI Assistant'}:</strong> ${text}`;
+            
+            if (sender === 'system') {
+                messageDiv.innerHTML = `<strong>System:</strong> ${text}`;
+                messageDiv.style.fontStyle = 'italic';
+                messageDiv.style.opacity = '0.8';
+            } else {
+                messageDiv.innerHTML = `<strong>${sender === 'user' ? 'You' : 'AI Assistant'}:</strong> ${text}`;
+            }
+            
             messagesContainer.appendChild(messageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Add sponsor badge indicator when AI responds
+            if (sender === 'ai') {
+                // Highlight the active model badge
+                setTimeout(() => {
+                    const badges = document.querySelectorAll('.sponsor-badge');
+                    badges.forEach(badge => badge.style.opacity = '0.5');
+                    
+                    // Highlight the selected model
+                    const activeModelClass = selectedModel === 'cerebras' ? 'cerebras' : 'cohere';
+                    const badge = document.querySelector(`.sponsor-badge.${activeModelClass}`);
+                    if (badge) {
+                        badge.style.opacity = '1';
+                        badge.style.transform = 'translateY(-2px) scale(1.05)';
+                        badge.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+                    }
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        badges.forEach(badge => {
+                            badge.style.opacity = '1';
+                            badge.style.transform = 'translateY(0) scale(1)';
+                            badge.style.boxShadow = 'none';
+                        });
+                    }, 3000);
+                }, 500);
+            }
         }
+        
+        // Initialize model selector event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click event listeners to model buttons
+            document.getElementById('cerebrasBtn').addEventListener('click', () => switchModel('cerebras'));
+            document.getElementById('cohereBtn').addEventListener('click', () => switchModel('cohere'));
+            
+            // Show initial welcome message
+            addMessage('AI Timing Expert ready! Choose your preferred model above and ask me about timing violations, optimization strategies, or FPGA design.', 'ai');
+        });
     </script>
 </body>
 </html>

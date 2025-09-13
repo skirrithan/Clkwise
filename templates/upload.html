@@ -18,7 +18,7 @@
             --text-secondary: #737373;
             --accent-yellow: #FFD700;
             --accent-blue: #0057B8;
-            --accent-green: #05E563;
+            --accent-green: #999999;
             --border-color: #333333;
             --hover-bg: rgba(255, 255, 255, 0.07);
         }
@@ -956,6 +956,220 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Sponsor badges styling */
+        .sponsor-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sponsor-badge {
+            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border: 1px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .sponsor-badge:hover {
+            background: linear-gradient(135deg, #333333 0%, #444444 100%);
+            transform: translateY(-1px);
+        }
+        
+        .sponsor-badge.groq {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8E53 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge.cohere {
+            background: linear-gradient(135deg, #39C5BB 0%, #4DD8CE 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge.rox {
+            background: linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge.gemini {
+            background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge.cerebras {
+            background: linear-gradient(135deg, #FF1744 0%, #FF5722 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge .icon {
+            font-size: 8px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .sponsor-badge {
+                font-size: 8px;
+                padding: 3px 6px;
+            }
+        }
+        
+        .sponsor-showcase {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .sponsor-showcase h4 {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .model-selector {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .model-selector h4 {
+            color: #999999;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .model-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .model-btn {
+            background: transparent;
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+        }
+        
+        .model-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+        
+        .model-btn.active {
+            opacity: 1;
+            border-color: #cccccc;
+            box-shadow: 0 0 20px rgba(204, 204, 204, 0.3);
+        }
+        
+        .model-btn .sponsor-badge {
+            margin: 0;
+            border-radius: 10px;
+        }
+        
+        .current-model {
+            margin-top: 10px;
+        }
+        
+        .current-model small {
+            color: #999999;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .dual-analysis-info {
+            margin: 30px 0;
+            text-align: center;
+            padding: 25px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+        
+        .dual-analysis-info h4 {
+            color: #999999;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .analysis-pipeline {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .pipeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #cccccc;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .pipeline-arrow {
+            color: #cccccc;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .pipeline-description {
+            margin-top: 10px;
+        }
+        
+        .pipeline-description small {
+            color: #999999;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .analysis-pipeline {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .pipeline-arrow {
+                transform: rotate(90deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -1015,6 +1229,17 @@
             <div class="container">
                 <h1 class="hero-title">AI-POWERED FPGA TIMING ANALYSIS PLATFORM</h1>
                 <p class="hero-subtitle">Upload your hardware design files and timing reports to get intelligent analysis and optimization recommendations for your FPGA timing closure challenges</p>
+                
+                <div class="sponsor-showcase">
+                    <h4>POWERED BY LEADING AI TECHNOLOGIES</h4>
+                    <div class="sponsor-badges">
+                        <span class="sponsor-badge groq"><span class="icon">⚡</span> GROQ ULTRA-FAST</span>
+                        <span class="sponsor-badge rox"><span class="icon">💎</span> ROX AI AGENT</span>
+                        <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE MULTIMODAL</span>
+                        <span class="sponsor-badge gemini"><span class="icon">📖</span> GEMINI LANGUAGE</span>
+                        <span class="sponsor-badge cerebras"><span class="icon">🚀</span> CEREBRAS INFERENCE</span>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -1057,9 +1282,26 @@
 
                 <div class="analyze-section">
                     <h3>ANALYSIS READY</h3>
-                    <p>UPLOAD TIMING REPORTS TO BEGIN AI ANALYSIS</p>
+                    <p>UPLOAD TIMING REPORTS TO BEGIN DUAL AI ANALYSIS</p>
+                    <div class="dual-analysis-info">
+                        <h4>DUAL MODEL ANALYSIS PIPELINE:</h4>
+                        <div class="analysis-pipeline">
+                            <div class="pipeline-step">
+                                <span class="step-number">1</span>
+                                <span class="sponsor-badge cerebras"><span class="icon">🚀</span> CEREBRAS ANALYSIS</span>
+                            </div>
+                            <div class="pipeline-arrow">→</div>
+                            <div class="pipeline-step">
+                                <span class="step-number">2</span>
+                                <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE REFINEMENT</span>
+                            </div>
+                        </div>
+                        <div class="pipeline-description">
+                            <small>COMPREHENSIVE ANALYSIS USING BOTH AI MODELS SEQUENTIALLY</small>
+                        </div>
+                    </div>
                     <button type="submit" form="analysisForm" class="primary-btn" id="analyzeBtn" disabled>
-                        START ANALYSIS
+                        START DUAL ANALYSIS
                     </button>
                 </div>
             </div>
@@ -1071,6 +1313,20 @@
                     <div class="chat-header">
                         <h3>AI TIMING EXPERT</h3>
                         <p>GET PROFESSIONAL GUIDANCE ON TIMING CLOSURE & FPGA OPTIMIZATION</p>
+                        <div class="model-selector">
+                            <h4>CHOOSE AI MODEL:</h4>
+                            <div class="model-buttons">
+                                <button class="model-btn active" data-model="cerebras" id="cerebrasBtn">
+                                    <span class="sponsor-badge cerebras"><span class="icon">🚀</span> CEREBRAS</span>
+                                </button>
+                                <button class="model-btn" data-model="cohere" id="cohereBtn">
+                                    <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE</span>
+                                </button>
+                            </div>
+                            <div class="current-model">
+                                <small id="currentModelText">USING CEREBRAS INFERENCE</small>
+                            </div>
+                        </div>
                     </div>
                     <div class="chat-messages" id="chatMessages">
                         <div class="message ai">
@@ -1252,6 +1508,36 @@
             });
         });
 
+        // Model selector functionality
+        let currentModel = 'cerebras'; // Default model for chat
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chat model selector event handlers
+            document.getElementById('cerebrasBtn').addEventListener('click', function() {
+                setActiveModel('cerebras');
+            });
+            
+            document.getElementById('cohereBtn').addEventListener('click', function() {
+                setActiveModel('cohere');
+            });
+        });
+        
+        function setActiveModel(model) {
+            currentModel = model;
+            
+            // Update button states (only chat model buttons)
+            document.getElementById('cerebrasBtn').classList.remove('active');
+            document.getElementById('cohereBtn').classList.remove('active');
+            document.getElementById(model + 'Btn').classList.add('active');
+            
+            // Update current model text
+            const modelNames = {
+                'cerebras': 'USING CEREBRAS INFERENCE',
+                'cohere': 'USING COHERE ANALYSIS'
+            };
+            document.getElementById('currentModelText').textContent = modelNames[model];
+        }
+        
         // Chat functionality
         function sendMessage() {
             const input = document.getElementById('chatInput');
@@ -1263,7 +1549,7 @@
             addMessage(message, 'user');
             input.value = '';
             
-            // Send to backend
+            // Send to backend with selected model
             fetch('/chat', {
                 method: 'POST',
                 headers: {
@@ -1272,7 +1558,8 @@
                 body: JSON.stringify({
                     message: message,
                     code_files: codeFiles.map(f => f.name),
-                    log_files: logFiles.map(f => f.name)
+                    log_files: logFiles.map(f => f.name),
+                    preferred_model: currentModel
                 })
             })
             .then(response => response.json())
