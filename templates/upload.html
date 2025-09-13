@@ -3,268 +3,1173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clkwise - AI Timing Debugger</title>
+    <title>CLKWISE - AI FPGA TIMING DEBUGGER</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --primary-bg: #000000;
+            --secondary-bg: #111111;
+            --tertiary-bg: #333333;
+            --text-primary: #ffffff;
+            --text-secondary: #737373;
+            --accent-yellow: #FFD700;
+            --accent-blue: #0057B8;
+            --accent-green: #05E563;
+            --border-color: #333333;
+            --hover-bg: rgba(255, 255, 255, 0.07);
+        }
+        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            outline: none !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
+        
+        ::selection {
+            background-color: var(--accent-yellow);
+            color: #000;
+        }
+        
+        ::-moz-selection {
+            background-color: var(--accent-yellow);
+            color: #000;
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--primary-bg);
             min-height: 100vh;
-            padding: 20px;
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-size: 21px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 1279.98px) {
+            body {
+                font-size: 15px;
+            }
+        }
+        /* Site Loader */
+        #site-loader {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background-color: var(--primary-bg);
+            opacity: 1;
+            transition: opacity ease 1s;
+            z-index: 20000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        body.loaded #site-loader {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader-content {
+            text-align: center;
+        }
+        
+        .loader-logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        
+        .loader-bars {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            align-items: flex-end;
+            height: 40px;
+        }
+        
+        .loader-bar {
+            width: 4px;
+            background: var(--accent-yellow);
+            animation: loader-pulse 1s ease-in-out infinite alternate;
+        }
+        
+        .loader-bar:nth-child(1) { animation-delay: 0.1s; }
+        .loader-bar:nth-child(2) { animation-delay: 0.2s; }
+        .loader-bar:nth-child(3) { animation-delay: 0.3s; }
+        .loader-bar:nth-child(4) { animation-delay: 0.4s; }
+        .loader-bar:nth-child(5) { animation-delay: 0.5s; }
+        
+        @keyframes loader-pulse {
+            0% { height: 10px; }
+            100% { height: 40px; }
+        }
+        
+        /* Typing Animation Banner - Fullscreen */
+        .typing-banner {
+            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+            min-height: calc(100vh - 120px); /* Account for header height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .typing-banner::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .typing-content {
+            max-width: 900px;
+            padding: 60px 40px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .typing-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+        
+        .typing-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            min-height: 30px;
+            line-height: 1.4;
+            margin-bottom: 60px;
+        }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: bounce 2s infinite;
+        }
+        
+        .scroll-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .scroll-arrow {
+            width: 2px;
+            height: 30px;
+            background: var(--accent-yellow);
+            position: relative;
+        }
+        
+        .scroll-arrow::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid var(--accent-yellow);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+        
+        @media (max-width: 639.98px) {
+            .typing-banner {
+                min-height: calc(100vh - 90px);
+            }
+            
+            .typing-content {
+                padding: 40px 20px;
+            }
+            
+            .typing-title {
+                font-size: 32px;
+                margin-bottom: 30px;
+            }
+            
+            .typing-text {
+                font-size: 18px;
+                min-height: 24px;
+                margin-bottom: 40px;
+            }
+            
+            .scroll-indicator {
+                bottom: 20px;
+            }
+        }
+        
+        .cursor {
+            display: inline-block;
+            background-color: var(--accent-yellow);
+            width: 2px;
+            height: 1.2em;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .page-wrapper {
+            min-height: 100vh;
+            background: var(--primary-bg);
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .top-bar {
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .top-bar-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .top-bar-content {
+                padding: 0 15px;
+            }
+        }
+        
+        .gov-notice {
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            position: relative;
+            padding-left: 0;
+        }
+        
+        
+        .language-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .lang-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 400;
+            transition: color 0.5s ease;
+        }
+        
+        .lang-link.active,
+        .lang-link:hover {
+            color: var(--text-primary);
+        }
+        
+        .lang-divider {
+            color: var(--text-secondary);
+        }
+        .main-nav {
+            background: var(--primary-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        @media (max-width: 639.98px) {
+            .main-nav {
+                padding: 15px 0;
+            }
+        }
+        
+        .nav-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .nav-content {
+                padding: 0 15px;
+            }
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+        
+        @media (max-width: 639.98px) {
+            .logo {
+                font-size: 24px;
+            }
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            align-items: center;
+        }
+        
+        @media (max-width: 991.98px) {
+            .nav-links {
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 639.98px) {
+            .nav-links {
+                display: none;
+            }
+        }
+        
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            transition: color 0.5s ease;
+            white-space: nowrap;
+        }
+        
+        .nav-link:hover,
+        .nav-link:focus-visible,
+        .nav-link.active {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        @media (max-width: 1279.98px) {
+            .nav-link {
+                font-size: 14px;
+            }
         }
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
+            padding: 0 25px;
         }
-        .header {
-            background: linear-gradient(90deg, #2c3e50, #34495e);
-            color: white;
-            padding: 30px;
+        
+        @media (max-width: 639.98px) {
+            .container {
+                padding: 0 15px;
+            }
+        }
+        
+        .hero-section {
+            background: var(--primary-bg);
+            padding: 80px 0 60px;
             text-align: center;
         }
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        
+        @media (max-width: 639.98px) {
+            .hero-section {
+                padding: 40px 0 30px;
+            }
         }
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
+        
+        .hero-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            letter-spacing: -0.02em;
+            line-height: 1.12;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
         }
-        .main-content {
+        
+        @media (max-width: 639.98px) {
+            .hero-title {
+                font-size: 21px;
+                margin-bottom: 14px;
+                line-height: 1.13;
+            }
+        }
+        
+        .hero-subtitle {
+            font-size: 18px;
+            color: var(--text-primary);
+            max-width: 856px;
+            margin: 0 auto 36px;
+            font-weight: 400;
+            line-height: 1.22;
+        }
+        
+        @media (max-width: 639.98px) {
+            .hero-subtitle {
+                font-size: 16px;
+                margin-bottom: 25px;
+            }
+        }
+        .main-section {
+            background: var(--primary-bg);
+            padding: 80px 0;
+            min-height: 60vh;
+        }
+        
+        @media (max-width: 639.98px) {
+            .main-section {
+                padding: 40px 0;
+            }
+        }
+        
+        .section-title {
+            font-size: 28px;
+            font-weight: 400;
+            color: var(--text-primary);
+            margin-bottom: 35px;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .section-title {
+                font-size: 21px;
+                margin-bottom: 25px;
+                line-height: 1.10;
+            }
+        }
+        .upload-grid {
             display: grid;
-            grid-template-columns: 1fr 400px;
-            gap: 0;
-            min-height: 600px;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 24px;
+            margin-bottom: 56px;
         }
-        .upload-section {
-            padding: 30px;
-            background: #f8f9fa;
+        .upload-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            padding: 40px 32px;
+            text-align: left;
+            transition: all 0.2s ease;
+            position: relative;
         }
-        .upload-area {
-            background: white;
-            border: 2px dashed #ddd;
-            border-radius: 10px;
-            padding: 30px;
-            margin-bottom: 20px;
-            text-align: center;
-            transition: all 0.3s ease;
+        
+        .upload-card:hover {
+            background: var(--hover-bg);
+            border-color: var(--text-primary);
         }
-        .upload-area:hover {
-            border-color: #667eea;
-            background: #f0f4ff;
+        
+        .upload-card.dragover {
+            border-color: var(--accent-yellow);
+            background: var(--hover-bg);
+            border-width: 2px;
         }
-        .upload-area.dragover {
-            border-color: #667eea;
-            background: #e3f2fd;
+        
+        @media (max-width: 639.98px) {
+            .upload-card {
+                padding: 25px 20px;
+            }
         }
-        .upload-area h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.3em;
+        .upload-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
         }
-        .upload-area p {
-            color: #666;
-            margin-bottom: 20px;
+        .upload-icon {
+            width: 56px;
+            height: 56px;
+            margin-right: 16px;
+            background: var(--tertiary-bg);
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--text-primary);
+        }
+        
+        .upload-card h3 {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .upload-card p {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            font-size: 14px;
+            line-height: 1.4;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-weight: 400;
+        }
+        
+        @media (max-width: 639.98px) {
+            .upload-card p {
+                font-size: 12px;
+                margin-bottom: 20px;
+            }
         }
         .file-input {
             display: none;
         }
         .upload-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
+            background: var(--text-primary);
+            color: var(--primary-bg);
+            border: 2px solid transparent;
+            padding: 18px 37px;
+            border-radius: 0;
             cursor: pointer;
-            font-size: 1.1em;
-            transition: transform 0.2s;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
         }
-        .upload-btn:hover {
-            transform: translateY(-2px);
+        
+        .upload-btn:hover:not(:disabled) {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+        }
+        
+        @media (max-width: 639.98px) {
+            .upload-btn {
+                padding: 17px 29px;
+                font-size: 14px;
+                line-height: 21px;
+            }
+        }
+        
+        .primary-btn {
+            background: var(--accent-yellow);
+            color: var(--primary-bg);
+            border: 2px solid transparent;
+            padding: 21px 35px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 240px;
+            min-height: 60px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+        
+        .primary-btn:hover:not(:disabled) {
+            background: var(--accent-green);
+            color: var(--primary-bg);
+        }
+        
+        .primary-btn:disabled {
+            background: var(--tertiary-bg);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            opacity: 0.3;
+        }
+        
+        @media (max-width: 639.98px) {
+            .primary-btn {
+                padding: 17px 29px;
+                font-size: 14px;
+                line-height: 21px;
+            }
         }
         .file-list {
-            margin-top: 15px;
-            text-align: left;
+            margin-top: 24px;
+            max-height: 300px;
+            overflow-y: auto;
         }
         .file-item {
-            background: #e8f4fd;
-            padding: 8px 12px;
-            margin: 5px 0;
-            border-radius: 5px;
+            background: var(--tertiary-bg);
+            padding: 16px;
+            margin: 8px 0;
+            border-radius: 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: background 0.2s ease;
+        }
+        
+        .file-item:hover {
+            background: var(--hover-bg);
         }
         .analyze-section {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 56px;
+            padding: 56px 40px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
         }
-        .analyze-btn {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
+        
+        .analyze-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .analyze-section p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-weight: 400;
+        }
+        
+        @media (max-width: 639.98px) {
+            .analyze-section {
+                padding: 35px 25px;
+                margin-top: 35px;
+            }
+            
+            .analyze-section p {
+                font-size: 12px;
+                margin-bottom: 20px;
+            }
+        }
+        .remove-file {
+            background: var(--text-secondary);
+            color: var(--text-primary);
             border: none;
-            padding: 15px 40px;
-            border-radius: 25px;
+            padding: 8px 12px;
+            border-radius: 0;
             cursor: pointer;
-            font-size: 1.2em;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
         }
-        .analyze-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        
+        .remove-file:hover {
+            background: var(--text-primary);
+            color: var(--primary-bg);
         }
+        .chat-section-wrapper {
+            background: var(--secondary-bg);
+            padding: 80px 0;
+        }
+        
+        @media (max-width: 639.98px) {
+            .chat-section-wrapper {
+                padding: 40px 0;
+            }
+        }
+        
         .chat-section {
-            background: #2c3e50;
-            color: white;
+            background: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
             display: flex;
             flex-direction: column;
+            max-width: 900px;
+            margin: 0 auto;
         }
         .chat-header {
-            padding: 20px;
-            background: #34495e;
-            border-bottom: 1px solid #4a5f7a;
+            padding: 32px 40px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--secondary-bg);
         }
+        
+        @media (max-width: 639.98px) {
+            .chat-header {
+                padding: 25px 20px 20px;
+            }
+        }
+        
         .chat-header h3 {
-            font-size: 1.4em;
-            margin-bottom: 5px;
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 400;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
         }
+        
+        @media (max-width: 639.98px) {
+            .chat-header h3 {
+                font-size: 21px;
+                line-height: 1.10;
+            }
+        }
+        
         .chat-header p {
-            opacity: 0.8;
-            font-size: 0.9em;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.4;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        @media (max-width: 639.98px) {
+            .chat-header p {
+                font-size: 12px;
+            }
         }
         .chat-messages {
             flex: 1;
-            padding: 20px;
+            padding: 32px 40px;
             overflow-y: auto;
             max-height: 400px;
+            background: var(--primary-bg);
+        }
+        
+        @media (max-width: 639.98px) {
+            .chat-messages {
+                padding: 25px 20px;
+            }
         }
         .message {
-            margin-bottom: 15px;
-            padding: 12px 15px;
-            border-radius: 10px;
+            margin-bottom: 16px;
+            padding: 14px 18px;
+            border-radius: 0;
             max-width: 85%;
+            font-size: 14px;
+            line-height: 1.4;
         }
+        
         .message.user {
-            background: #667eea;
+            background: var(--text-primary);
+            color: var(--primary-bg);
             margin-left: auto;
         }
+        
         .message.ai {
-            background: #4a5f7a;
+            background: var(--tertiary-bg);
+            color: var(--text-primary);
             margin-right: auto;
+            border: 1px solid var(--border-color);
         }
         .chat-input {
-            padding: 20px;
-            border-top: 1px solid #4a5f7a;
+            padding: 24px 40px 32px;
+            border-top: 1px solid var(--border-color);
+            background: var(--secondary-bg);
         }
+        
+        @media (max-width: 639.98px) {
+            .chat-input {
+                padding: 20px 15px 25px;
+            }
+        }
+        
         .chat-input-box {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
+        
         .chat-input-box input {
             flex: 1;
-            padding: 12px 15px;
-            border: none;
-            border-radius: 25px;
-            font-size: 1em;
+            padding: 14px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            font-size: 14px;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
         }
+        
+        .chat-input-box input:focus {
+            outline: none;
+            border-color: var(--text-primary);
+        }
+        
+        .chat-input-box input::placeholder {
+            color: var(--text-secondary);
+        }
+        
         .chat-send-btn {
-            background: #667eea;
-            color: white;
+            background: var(--accent-yellow);
+            color: var(--primary-bg);
             border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
+            padding: 14px 24px;
+            border-radius: 0;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.15s ease;
+            min-height: 56px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
         }
-        .remove-file {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 0.8em;
+        
+        .chat-send-btn:hover {
+            background: var(--accent-green);
         }
+        /* Footer */
+        .footer {
+            background: var(--secondary-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0;
+            margin-top: 80px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .footer {
+                padding: 25px 0;
+                margin-top: 40px;
+            }
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        .footer-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .footer-links {
+                gap: 15px;
+            }
+        }
+        
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            transition: color 0.5s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+        
         @media (max-width: 768px) {
             .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .upload-grid {
                 grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔧 Clkwise</h1>
-            <p>AI-Powered Timing Debugger for FPGA Design</p>
-        </div>
-        
-        <div class="main-content">
-            <div class="upload-section">
-                <form id="analysisForm" action="/analyze" method="post" enctype="multipart/form-data">
-                    <!-- Code Files Upload -->
-                    <div class="upload-area" id="codeUpload">
-                        <h3>📁 Hardware Code Files</h3>
-                        <p>Upload your Verilog/SystemVerilog/VHDL files</p>
-                        <button type="button" class="upload-btn" onclick="document.getElementById('codeFiles').click()">
-                            Choose Code Files
-                        </button>
-                        <input type="file" id="codeFiles" name="code_files" class="file-input" multiple 
-                               accept=".v,.sv,.vhd,.vhdl,.vh,.svh">
-                        <div id="codeFileList" class="file-list"></div>
-                    </div>
-
-                    <!-- Timing Reports Upload -->
-                    <div class="upload-area" id="logUpload">
-                        <h3>📊 Timing Reports & Logs</h3>
-                        <p>Upload Vivado timing reports, synthesis logs, etc.</p>
-                        <button type="button" class="upload-btn" onclick="document.getElementById('logFiles').click()">
-                            Choose Report Files
-                        </button>
-                        <input type="file" id="logFiles" name="log_files" class="file-input" multiple 
-                               accept=".rpt,.log,.txt,.out">
-                        <div id="logFileList" class="file-list"></div>
-                    </div>
-
-                    <div class="analyze-section">
-                        <button type="submit" class="analyze-btn" id="analyzeBtn" disabled>
-                            🚀 Analyze Design
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="chat-section">
-                <div class="chat-header">
-                    <h3>💬 AI Assistant</h3>
-                    <p>Chat with AI to get help fixing timing issues</p>
-                </div>
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message ai">
-                        <strong>AI Assistant:</strong> Hi! Upload your code files and timing reports, then I can help you analyze and fix timing violations. You can also ask me questions about FPGA design and timing closure techniques.
-                    </div>
-                </div>
-                <div class="chat-input">
-                    <div class="chat-input-box">
-                        <input type="text" id="chatInput" placeholder="Ask about timing issues, HDL optimization..." 
-                               onkeypress="if(event.key==='Enter') sendMessage()">
-                        <button class="chat-send-btn" onclick="sendMessage()">Send</button>
-                    </div>
-                </div>
+    <!-- Site Loader -->
+    <div id="site-loader">
+        <div class="loader-content">
+            <div class="loader-logo">CLKWISE</div>
+            <div class="loader-bars">
+                <div class="loader-bar"></div>
+                <div class="loader-bar"></div>
+                <div class="loader-bar"></div>
+                <div class="loader-bar"></div>
+                <div class="loader-bar"></div>
             </div>
         </div>
     </div>
+    
+    <div class="page-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-content">
+                <div class="gov-notice">OFFICIAL FPGA TIMING ANALYSIS PLATFORM</div>
+                <div class="language-selector">
+                    <a href="#" class="lang-link active">EN</a>
+                    <span class="lang-divider"> · </span>
+                    <a href="#" class="lang-link">FR</a>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="main-nav">
+            <div class="nav-content">
+                <a href="/" class="logo">CLKWISE</a>
+                <div class="nav-links">
+                    <a href="/" class="nav-link active">Home</a>
+                    <a href="#" class="nav-link">Projects</a>
+                    <a href="#" class="nav-link">Reports</a>
+                    <a href="/about" class="nav-link">About</a>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Typing Animation Banner -->
+        <div class="typing-banner">
+            <div class="typing-content">
+                <h1 class="typing-title">CLKWISE AI</h1>
+                <div class="typing-text" id="typingText">
+                    <span class="cursor" id="cursor"></span>
+                </div>
+            </div>
+            <div class="scroll-indicator">
+                <div class="scroll-text">SCROLL TO CONTINUE</div>
+                <div class="scroll-arrow"></div>
+            </div>
+        </div>
+        
+        <div class="hero-section">
+            <div class="container">
+                <h1 class="hero-title">AI-POWERED FPGA TIMING ANALYSIS PLATFORM</h1>
+                <p class="hero-subtitle">Upload your hardware design files and timing reports to get intelligent analysis and optimization recommendations for your FPGA timing closure challenges</p>
+            </div>
+        </div>
+        
+        <div class="main-section">
+            <div class="container">
+                <h2 class="section-title">HARDWARE ANALYSIS UPLOAD CENTER</h2>
+                <div class="upload-grid">
+                    <form id="analysisForm" action="/analyze" method="post" enctype="multipart/form-data">
+                        <!-- Code Files Upload -->
+                        <div class="upload-card" id="codeUpload">
+                            <div class="upload-card-header">
+                                <div class="upload-icon">HD</div>
+                                <h3>HDL Design Files</h3>
+                            </div>
+                            <p>VERILOG, SYSTEMVERILOG, VHDL CODE ANALYSIS. SUPPORTED: .V, .SV, .VHD, .VHDL</p>
+                            <button type="button" class="upload-btn" onclick="document.getElementById('codeFiles').click()">
+                                <span>Choose Files</span>
+                            </button>
+                            <input type="file" id="codeFiles" name="code_files" class="file-input" multiple 
+                                   accept=".v,.sv,.vhd,.vhdl,.vh,.svh">
+                            <div id="codeFileList" class="file-list"></div>
+                        </div>
+
+                        <!-- Timing Reports Upload -->
+                        <div class="upload-card" id="logUpload">
+                            <div class="upload-card-header">
+                                <div class="upload-icon">TR</div>
+                                <h3>Timing Reports & Analysis</h3>
+                            </div>
+                            <p>VIVADO REPORTS, SYNTHESIS LOGS, EDA ANALYSIS. SUPPORTED: .RPT, .LOG, .TXT</p>
+                            <button type="button" class="upload-btn" onclick="document.getElementById('logFiles').click()">
+                                <span>Choose Files</span>
+                            </button>
+                            <input type="file" id="logFiles" name="log_files" class="file-input" multiple 
+                                   accept=".rpt,.log,.txt,.out">
+                            <div id="logFileList" class="file-list"></div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="analyze-section">
+                    <h3>ANALYSIS READY</h3>
+                    <p>UPLOAD TIMING REPORTS TO BEGIN AI ANALYSIS</p>
+                    <button type="submit" form="analysisForm" class="primary-btn" id="analyzeBtn" disabled>
+                        START ANALYSIS
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-section-wrapper">
+            <div class="container">
+                <div class="chat-section">
+                    <div class="chat-header">
+                        <h3>AI TIMING EXPERT</h3>
+                        <p>GET PROFESSIONAL GUIDANCE ON TIMING CLOSURE & FPGA OPTIMIZATION</p>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai">
+                            <strong>AI Expert:</strong> READY TO ANALYZE YOUR FPGA TIMING CHALLENGES. UPLOAD YOUR FILES AND I'LL PROVIDE TARGETED OPTIMIZATION RECOMMENDATIONS.
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <div class="chat-input-box">
+                            <input type="text" id="chatInput" placeholder="ASK ABOUT TIMING VIOLATIONS, OPTIMIZATION STRATEGIES, HDL BEST PRACTICES..." 
+                                   onkeypress="if(event.key==='Enter') sendMessage()">
+                            <button class="chat-send-btn" onclick="sendMessage()">SEND</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-text">CLKWISE AI FPGA TIMING ANALYSIS PLATFORM</div>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">About</a>
+                        <a href="#" class="footer-link">Documentation</a>
+                        <a href="#" class="footer-link">Support</a>
+                        <a href="#" class="footer-link">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
 
     <script>
+        // Site loader
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+                // Start typing animation after loader
+                setTimeout(startTypingAnimation, 500);
+            }, 1500);
+        });
+        
+        // Typing Animation
+        function startTypingAnimation() {
+            const messages = [
+                "Hi I'm Clkwise! Your AI-powered FPGA timing analysis assistant.",
+                "I specialize in identifying and fixing timing violations in digital designs.",
+                "Upload your HDL files and timing reports to get intelligent analysis.",
+                "Let's achieve perfect timing closure for your FPGA designs together.",
+                "Ready to optimize your digital circuits? Scroll down to get started!"
+            ];
+            
+            let messageIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+            const typingText = document.getElementById('typingText');
+            const cursor = document.getElementById('cursor');
+            
+            function type() {
+                const currentMessage = messages[messageIndex];
+                
+                if (isDeleting) {
+                    // Deleting characters
+                    typingText.textContent = currentMessage.substring(0, charIndex - 1);
+                    charIndex--;
+                    
+                    if (charIndex === 0) {
+                        isDeleting = false;
+                        messageIndex = (messageIndex + 1) % messages.length;
+                        setTimeout(type, 500); // Pause before typing next message
+                        return;
+                    }
+                } else {
+                    // Typing characters
+                    typingText.textContent = currentMessage.substring(0, charIndex + 1);
+                    charIndex++;
+                    
+                    if (charIndex === currentMessage.length) {
+                        // Message complete, pause then start deleting
+                        setTimeout(() => {
+                            isDeleting = true;
+                            type();
+                        }, 3000); // Display message for 3 seconds
+                        return;
+                    }
+                }
+                
+                // Add cursor back
+                typingText.appendChild(cursor);
+                
+                // Typing speed
+                const speed = isDeleting ? 50 : 80;
+                setTimeout(type, speed);
+            }
+            
+            type();
+        }
+        
         let codeFiles = [];
         let logFiles = [];
 

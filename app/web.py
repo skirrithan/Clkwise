@@ -182,6 +182,10 @@ What specific aspect would you like help with?"""
 def upload_form():
     return render_template('upload.html')
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     try:
@@ -293,6 +297,6 @@ if __name__ == '__main__':
     print(f"Cohere API configured: {'Yes' if COHERE_API_KEY else 'No'}")
     print(f"Cerebras API configured: {'Yes' if CEREBRAS_API_KEY else 'No'}")
     print("")
-    print("🌐 Web interface will be available at: http://127.0.0.1:8000/")
-    print("   (Using port 8000 to avoid macOS AirPlay conflict on port 5000)")
-    app.run(debug=True, host='127.0.0.1', port=8000)
+    print("🌐 Web interface will be available at: http://127.0.0.1:5001/")
+    print("   (Using port 5001 to avoid conflicts)")
+    app.run(debug=True, host='127.0.0.1', port=5001)
