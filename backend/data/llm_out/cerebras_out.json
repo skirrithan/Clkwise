@@ -1,0 +1,154 @@
+{
+  "id": "violation#0",
+  "input": {
+    "clock": "sys_clk@250.0MHz (4.0ns)",
+    "overview": {
+      "wns_ns": -5.961,
+      "tns_ns": -616.532,
+      "violations": 20
+    },
+    "sdc_gaps": [],
+    "issues": [
+      {
+        "path_kind": "reg->out",
+        "signal_group": "y[*]",
+        "worst_bit": 62,
+        "worst_slack_ns": -5.961,
+        "dominant_delay": "OBUF + routing + skew",
+        "skew_character": "negative_source_skew_large",
+        "evidence": {
+          "data_path_ns": 4.785,
+          "logic_ns": 2.728,
+          "route_ns": 2.057,
+          "levels_of_logic": 1,
+          "clock_skew_ns": -4.641,
+          "output_delay_ns": 0.5,
+          "dcd_ns": 0.0,
+          "scd_ns": 4.641,
+          "cpr_ns": 0.0,
+          "clock_uncertainty_ns": 0.035,
+          "tsj_ns": 0.071,
+          "tij_ns": 0.0,
+          "dj_ns": 0.0,
+          "pe_ns": 0.0,
+          "required_time_ns": 3.465,
+          "arrival_time_ns": -9.426,
+          "io_primitive": "OBUF",
+          "io_site": "G15",
+          "src_slice": "SLICE_X0Y167",
+          "clock_net_fanout_max": null,
+          "clock_net_delay_ns_total": null
+        },
+        "root_cause": "Unpipelined REG->OBUF path to top-level port with high OBUF + routing + skew and large negative source clock skew (source path > dest path).",
+        "where_in_code": {
+          "dest_port": "y[[1:0,44:42,50:47,63:53]",
+          "src_ff_regex": "y_reg\\[(\\d+)\\]"
+        },
+        "fix_hints": [
+          "Add output pipeline/reg in IOB (Vivado: set_property IOB TRUE [get_cells <y_reg[*]>]).",
+          "Use ODDR/OSERDES or dedicated IO primitives for high-speed buses.",
+          "Floorplan: LOC the output regs near the target IO bank; add Pblock over the bank; reduce long routes.",
+          "If external timing allows, relax set_output_delay -max/-min or the clock period.",
+          "Try OBUFDS (if differential) or faster IO standard/drive settings; evaluate SLEW=FAST where signal integrity permits.",
+          "Constrain placement to shorten critical nets; resolve congestion hot spots near the IO bank."
+        ]
+      }
+    ]
+  },
+  "result": {
+    "summary": {
+      "clock_name": "sys_clk",
+      "period_ns": 4.0,
+      "wns_ns": -5.961,
+      "path_kind": "reg->out",
+      "signal_group": "y[*]",
+      "root_cause": "Unpipelined REG->OBUF path to top-level port with high OBUF + routing + skew and large negative source clock skew (source path > dest path)."
+    },
+    "fixes": [
+      {
+        "id": "F1",
+        "title": "Add Output Pipelining",
+        "rationale": "Breaking the long path into stages to reduce the critical path delay.",
+        "where": {
+          "file": "top.sv",
+          "anchor_regex": "always_ff",
+          "ports_touched": [
+            "y"
+          ],
+          "signals_new": [
+            "y_pipe1"
+          ]
+        },
+        "verilog_patch": {
+          "kind": "insert_block",
+          "after_regex": "logic \\[63:0\\] sum",
+          "before_regex": "always_ff",
+          "block": "logic [63:0] y_pipe1;"
+        },
+        "latency_impact_cycles": 1
+      },
+      {
+        "id": "F2",
+        "title": "Update Output Logic",
+        "rationale": "Move the output logic to use the pipelined signal.",
+        "where": {
+          "file": "top.sv",
+          "anchor_regex": "y <= sum",
+          "ports_touched": [
+            "y"
+          ],
+          "signals_new": null
+        },
+        "verilog_patch": {
+          "kind": "replace_regex",
+          "after_regex": null,
+          "before_regex": "y <= sum",
+          "block": "y <= y_pipe1;"
+        },
+        "latency_impact_cycles": 0
+      },
+      {
+        "id": "F3",
+        "title": "Register the Pipelined Signal",
+        "rationale": "Add a register for the pipelined signal.",
+        "where": {
+          "file": "top.sv",
+          "anchor_regex": "always_ff",
+          "ports_touched": [
+            "y_pipe1"
+          ],
+          "signals_new": null
+        },
+        "verilog_patch": {
+          "kind": "insert_block",
+          "after_regex": "if \\(!rst_n\\) y <= '0;",
+          "before_regex": "endmodule",
+          "block": "  always_ff @(posedge clk or negedge rst_n) begin\n    if (!rst_n) y_pipe1 <= '0;\n    else        y_pipe1 <= sum;\n  end"
+        },
+        "latency_impact_cycles": 1
+      }
+    ],
+    "artifacts": {
+      "top_sv": {
+        "path": "top.sv",
+        "language": "verilog",
+        "encoding": "utf-8",
+        "content": "module top(\n  input  logic         clk,\n  input  logic         rst_n,\n  input  logic [31:0]  a, b, c, d, e, //32 bit\n  output logic [63:0]  y //64 bit\n);\n\n  logic [63:0] mul1 = a * b; //32 bit x 32 bit\n  logic [63:0] mul2 = c * d; //32 bit x 32 bit\n  logic [63:0] sum  = mul1 + mul2 + e;  //64 bit + 64 bit + 32 bit\n  logic [63:0] y_pipe1;\n\n  always_ff @(posedge clk or negedge rst_n) begin\n    if (!rst_n) y_pipe1 <= '0;\n    else        y_pipe1 <= sum;\n  end\n\n  always_ff @(posedge clk or negedge rst_n) begin\n    if (!rst_n) y <= '0;\n    else        y <= y_pipe1;\n  end\nendmodule",
+        "ui": {
+          "text": "module top(\n  input  logic         clk,\n  input  logic         rst_n,\n  input  logic [31:0]  a, b, c, d, e, //32 bit\n  output logic [63:0]  y //64 bit\n);\n\n  logic [63:0] mul1 = a * b; //32 bit x 32 bit\n  logic [63:0] mul2 = c * d; //32 bit x 32 bit\n  logic [63:0] sum  = mul1 + mul2 + e;  //64 bit + 64 bit + 32 bit\n  logic [63:0] y_pipe1;\n\n  always_ff @(posedge clk or negedge rst_n) begin\n    if (!rst_n) y_pipe1 <= '0;\n    else        y_pipe1 <= sum;\n  end\n\n  always_ff @(posedge clk or negedge rst_n) begin\n    if (!rst_n) y <= '0;\n    else        y <= y_pipe1;\n  end\nendmodule"
+        }
+      }
+    },
+    "risks": [
+      "Added latency",
+      "Complexity increase"
+    ],
+    "verification": [
+      "Check timing reports",
+      "Simulation"
+    ]
+  },
+  "has_sv_artifact": false,
+  "model": "llama-4-scout-17b-16e-instruct",
+  "elapsed_sec": 3.089
+}

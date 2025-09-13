@@ -1,0 +1,55 @@
+{
+  "clock": "sys_clk@250.0MHz (4.0ns)",
+  "overview": {
+    "wns_ns": -5.961,
+    "tns_ns": -616.532,
+    "violations": 20
+  },
+  "sdc_gaps": [],
+  "issues": [
+    {
+      "path_kind": "reg->out",
+      "signal_group": "y[*]",
+      "worst_bit": 62,
+      "worst_slack_ns": -5.961,
+      "dominant_delay": "OBUF + routing + skew",
+      "skew_character": "negative_source_skew_large",
+      "evidence": {
+        "data_path_ns": 4.785,
+        "logic_ns": 2.728,
+        "route_ns": 2.057,
+        "levels_of_logic": 1,
+        "clock_skew_ns": -4.641,
+        "output_delay_ns": 0.5,
+        "dcd_ns": 0.0,
+        "scd_ns": 4.641,
+        "cpr_ns": 0.0,
+        "clock_uncertainty_ns": 0.035,
+        "tsj_ns": 0.071,
+        "tij_ns": 0.0,
+        "dj_ns": 0.0,
+        "pe_ns": 0.0,
+        "required_time_ns": 3.465,
+        "arrival_time_ns": -9.426,
+        "io_primitive": "OBUF",
+        "io_site": "G15",
+        "src_slice": "SLICE_X0Y167",
+        "clock_net_fanout_max": null,
+        "clock_net_delay_ns_total": null
+      },
+      "root_cause": "Unpipelined REG->OBUF path to top-level port with high OBUF + routing + skew and large negative source clock skew (source path > dest path).",
+      "where_in_code": {
+        "dest_port": "y[[1:0,44:42,50:47,63:53]",
+        "src_ff_regex": "y_reg\\[(\\d+)\\]"
+      },
+      "fix_hints": [
+        "Add output pipeline/reg in IOB (Vivado: set_property IOB TRUE [get_cells <y_reg[*]>]).",
+        "Use ODDR/OSERDES or dedicated IO primitives for high-speed buses.",
+        "Floorplan: LOC the output regs near the target IO bank; add Pblock over the bank; reduce long routes.",
+        "If external timing allows, relax set_output_delay -max/-min or the clock period.",
+        "Try OBUFDS (if differential) or faster IO standard/drive settings; evaluate SLEW=FAST where signal integrity permits.",
+        "Constrain placement to shorten critical nets; resolve congestion hot spots near the IO bank."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+# Ignore Vivado-generated files
+*.log
+*.jou
+*.str
+*.dcp
+*.rpt
+*.bit
+*.bin
+*.xml
+*.xpr
+*.xwbt
+*.xwcfg
+*.xwinfo
+*.xwopt
+hw/*.txt
+*.cpy
+
+
+# Ignore build directories
+backend/hw/.Xil/
+backend/hw/vivado*
+data/
+
+# Ignore temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+#ignore pycache
+backend/app/ingest/__pycache__
