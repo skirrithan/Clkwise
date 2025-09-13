@@ -18,6 +18,8 @@ hw/*.txt
 # Ignore build directories
 hw/.Xil/
 hw/vivado*
+backend/hw/.Xil/
+backend/hw/vivado*
 data/
 
 # Ignore temporary files
@@ -29,10 +31,13 @@ data/
 # Ignore system files
 .DS_Store
 Thumbs.db
-desktop.ini# Python cache files
+desktop.ini
+
+# Python cache files
 __pycache__/
 *.py[cod]
 *.class
+backend/app/ingest/__pycache__
 
 # Flask session files
 flask_session/
@@ -47,6 +52,3 @@ temp_uploads/
 # IDE files
 .vscode/
 .idea/
-
-# macOS files
-.DS_Store
