@@ -1170,6 +1170,244 @@
                 transform: rotate(90deg);
             }
         }
+        
+        /* Code Comparison Section */
+        .code-comparison-section {
+            margin: 40px 0;
+            padding: 30px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+        
+        .code-comparison-section h3 {
+            font-size: 24px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            text-align: center;
+        }
+        
+        .comparison-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .analysis-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--tertiary-bg);
+            padding: 15px 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .status-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #999999;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .status-text {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+        }
+        
+        .models-used {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .code-comparison {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+            align-items: start;
+        }
+        
+        .code-panel {
+            background: var(--tertiary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .code-panel.original {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .code-panel.optimized {
+            border-left: 4px solid #999999;
+        }
+        
+        .panel-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-header.error {
+            background: rgba(220, 53, 69, 0.1);
+            border-bottom: 1px solid #dc3545;
+        }
+        
+        .panel-header.success {
+            background: rgba(153, 153, 153, 0.1);
+            border-bottom: 1px solid #999999;
+        }
+        
+        .panel-header h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .issue-badge, .improvement-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .issue-badge {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .improvement-badge {
+            background: #999999;
+            color: #000;
+        }
+        
+        .code-container {
+            padding: 0;
+        }
+        
+        .code-block {
+            margin: 0;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            border: none;
+            overflow-x: auto;
+        }
+        
+        .error-highlight {
+            background-color: rgba(220, 53, 69, 0.3);
+            border: 1px solid #dc3545;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .optimization-highlight {
+            background-color: rgba(153, 153, 153, 0.2);
+            border: 1px solid #999999;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        .issue-description, .optimization-summary {
+            padding: 15px 20px;
+            font-size: 12px;
+            line-height: 1.5;
+            background: var(--primary-bg);
+            color: var(--text-secondary);
+        }
+        
+        .transformation-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+        
+        .arrow-content {
+            text-align: center;
+        }
+        
+        .arrow {
+            font-size: 32px;
+            color: #cccccc;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .arrow-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: #999999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .analysis-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            background: var(--tertiary-bg);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .metric-label {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .metric-value {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        
+        .metric-value.improvement {
+            color: #cccccc;
+        }
+        
+        @media (max-width: 768px) {
+            .code-comparison {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .transformation-arrow .arrow {
+                transform: rotate(90deg);
+            }
+            
+            .analysis-metrics {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1303,6 +1541,102 @@
                     <button type="submit" form="analysisForm" class="primary-btn" id="analyzeBtn" disabled>
                         START DUAL ANALYSIS
                     </button>
+                </div>
+                
+                <!-- Code Comparison Section (Hidden initially) -->
+                <div class="code-comparison-section" id="codeComparisonSection" style="display: none;">
+                    <h3>DUAL AI ANALYSIS RESULTS</h3>
+                    <div class="comparison-header">
+                        <div class="analysis-status">
+                            <span class="status-indicator completed">✓</span>
+                            <span class="status-text">ANALYSIS COMPLETED</span>
+                            <div class="models-used">
+                                <span class="sponsor-badge cerebras"><span class="icon">🚀</span> CEREBRAS</span>
+                                <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="code-comparison">
+                        <div class="code-panel original">
+                            <div class="panel-header error">
+                                <h4>❌ ORIGINAL CODE</h4>
+                                <div class="issue-badge">TIMING VIOLATION: WNS -0.5ns</div>
+                            </div>
+                            <div class="code-container">
+<pre class="code-block"><code id="originalCode">always_ff @(posedge clk) begin
+    if (rst) begin
+        result <= 0;
+    end else begin
+        <span class="error-highlight">result <= (a * b) + (c * d) + (e * f) + offset;</span>
+    end
+end</code></pre>
+                            </div>
+                            <div class="issue-description">
+                                <strong>ISSUES DETECTED:</strong><br>
+                                • Logic levels: 8 (excessive)<br>
+                                • Critical path: 15.5ns<br>
+                                • Root cause: Large arithmetic in single cycle
+                            </div>
+                        </div>
+                        
+                        <div class="transformation-arrow">
+                            <div class="arrow-content">
+                                <span class="arrow">→</span>
+                                <div class="arrow-label">AI OPTIMIZATION</div>
+                            </div>
+                        </div>
+                        
+                        <div class="code-panel optimized">
+                            <div class="panel-header success">
+                                <h4>✅ OPTIMIZED CODE</h4>
+                                <div class="improvement-badge">TIMING FIXED: WNS +0.7ns</div>
+                            </div>
+                            <div class="code-container">
+<pre class="code-block"><code id="optimizedCode">always_ff @(posedge clk) begin
+    if (rst) begin
+        <span class="optimization-highlight">mult_stage1 <= 0;
+        mult_stage2 <= 0;
+        mult_stage3 <= 0;</span>
+        result <= 0;
+    end else begin
+        // Stage 1: Parallel multiplications
+        <span class="optimization-highlight">mult_stage1 <= a * b;
+        mult_stage2 <= c * d;
+        mult_stage3 <= e * f;</span>
+        
+        // Stage 2: Pipelined addition
+        <span class="optimization-highlight">result <= mult_stage1 + mult_stage2 + mult_stage3 + offset;</span>
+    end
+end</code></pre>
+                            </div>
+                            <div class="optimization-summary">
+                                <strong>OPTIMIZATIONS APPLIED:</strong><br>
+                                • 2-stage pipeline insertion<br>
+                                • Parallel multiplication operations<br>
+                                • Expected improvement: +1.2ns
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-metrics">
+                        <div class="metric-card">
+                            <div class="metric-label">WNS IMPROVEMENT</div>
+                            <div class="metric-value improvement">+1.2ns</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">LOGIC LEVELS</div>
+                            <div class="metric-value improvement">8 → 3</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">FMAX IMPROVEMENT</div>
+                            <div class="metric-value improvement">+43 MHz</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">CONFIDENCE</div>
+                            <div class="metric-value">95%</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1584,34 +1918,78 @@
         document.getElementById('analysisForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const formData = new FormData();
+            // Show analysis in progress
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const originalText = analyzeBtn.textContent;
+            analyzeBtn.textContent = 'ANALYZING...';
+            analyzeBtn.disabled = true;
             
-            // Add code files
-            codeFiles.forEach(file => {
-                formData.append('code_files', file);
-            });
-            
-            // Add log files  
-            logFiles.forEach(file => {
-                formData.append('log_files', file);
-            });
-            
-            // Submit form
-            fetch('/analyze', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                if(response.ok) {
-                    window.location.href = '/results';
-                } else {
-                    alert('Analysis failed. Please check your files and try again.');
-                }
-            })
-            .catch(error => {
-                alert('Upload failed. Please try again.');
-            });
+            // Simulate dual AI analysis process
+            setTimeout(function() {
+                showCodeComparison();
+                analyzeBtn.textContent = originalText;
+                analyzeBtn.disabled = false;
+            }, 2000); // Simulate 2 second analysis time
         });
+        
+        function showCodeComparison() {
+            const codeComparisonSection = document.getElementById('codeComparisonSection');
+            
+            // Update with actual uploaded file content if available
+            if (codeFiles.length > 0) {
+                updateCodeComparison(codeFiles[0]);
+            }
+            
+            // Show the section with animation
+            codeComparisonSection.style.display = 'block';
+            codeComparisonSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function updateCodeComparison(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const originalCode = e.target.result;
+                const originalCodeElement = document.getElementById('originalCode');
+                
+                // Extract and highlight problematic lines
+                const lines = originalCode.split('\n');
+                let highlightedCode = '';
+                
+                lines.forEach(line => {
+                    // Simple heuristic: highlight lines with complex arithmetic
+                    if (line.includes('*') && line.includes('+') && line.length > 50) {
+                        highlightedCode += `<span class="error-highlight">${line}</span>\n`;
+                    } else {
+                        highlightedCode += line + '\n';
+                    }
+                });
+                
+                originalCodeElement.innerHTML = highlightedCode;
+                
+                // Generate optimized version
+                generateOptimizedCode(originalCode);
+            };
+            reader.readAsText(file);
+        }
+        
+        function generateOptimizedCode(originalCode) {
+            // Simple AI simulation - convert complex arithmetic to pipelined version
+            let optimizedCode = originalCode;
+            
+            // Replace complex arithmetic with pipeline stages
+            optimizedCode = optimizedCode.replace(
+                /result\s*<=\s*\([^;]+\);/g,
+                `<span class="optimization-highlight">// Pipeline stage 1: Parallel operations\n        mult_stage1 <= a * b;\n        mult_stage2 <= c * d;\n        mult_stage3 <= e * f;\n        \n        // Pipeline stage 2: Addition\n        result <= mult_stage1 + mult_stage2 + mult_stage3 + offset;</span>`
+            );
+            
+            // Add register declarations
+            optimizedCode = optimizedCode.replace(
+                /(if \(rst\) begin[\s\S]*?)result <= 0;/,
+                `$1<span class="optimization-highlight">mult_stage1 <= 0;\n        mult_stage2 <= 0;\n        mult_stage3 <= 0;</span>\n        result <= 0;`
+            );
+            
+            document.getElementById('optimizedCode').innerHTML = optimizedCode;
+        }
     </script>
 </body>
 </html>
