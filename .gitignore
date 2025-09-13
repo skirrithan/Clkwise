@@ -13,6 +13,7 @@
 *.xwinfo
 *.xwopt
 hw/*.txt
+*.cpy
 
 # Ignore build directories
 hw/.Xil/
