@@ -2,13 +2,424 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Clkwise - Upload Timing Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clkwise - AI Timing Debugger</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 0;
+            min-height: 600px;
+        }
+        .upload-section {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        .upload-area {
+            background: white;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+        .upload-area h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        .upload-area p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .file-input {
+            display: none;
+        }
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: transform 0.2s;
+        }
+        .upload-btn:hover {
+            transform: translateY(-2px);
+        }
+        .file-list {
+            margin-top: 15px;
+            text-align: left;
+        }
+        .file-item {
+            background: #e8f4fd;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .analyze-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .analyze-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        }
+        .chat-section {
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 20px;
+            background: #34495e;
+            border-bottom: 1px solid #4a5f7a;
+        }
+        .chat-header h3 {
+            font-size: 1.4em;
+            margin-bottom: 5px;
+        }
+        .chat-header p {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 400px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            max-width: 85%;
+        }
+        .message.user {
+            background: #667eea;
+            margin-left: auto;
+        }
+        .message.ai {
+            background: #4a5f7a;
+            margin-right: auto;
+        }
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #4a5f7a;
+        }
+        .chat-input-box {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input-box input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+        }
+        .chat-send-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .remove-file {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Upload Vivado Timing Report</h1>
-    <form action="/analyze" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept=".rpt,.txt">
-        <input type="submit" value="Analyze">
-    </form>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Clkwise</h1>
+            <p>AI-Powered Timing Debugger for FPGA Design</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <form id="analysisForm" action="/analyze" method="post" enctype="multipart/form-data">
+                    <!-- Code Files Upload -->
+                    <div class="upload-area" id="codeUpload">
+                        <h3>📁 Hardware Code Files</h3>
+                        <p>Upload your Verilog/SystemVerilog/VHDL files</p>
+                        <button type="button" class="upload-btn" onclick="document.getElementById('codeFiles').click()">
+                            Choose Code Files
+                        </button>
+                        <input type="file" id="codeFiles" name="code_files" class="file-input" multiple 
+                               accept=".v,.sv,.vhd,.vhdl,.vh,.svh">
+                        <div id="codeFileList" class="file-list"></div>
+                    </div>
+
+                    <!-- Timing Reports Upload -->
+                    <div class="upload-area" id="logUpload">
+                        <h3>📊 Timing Reports & Logs</h3>
+                        <p>Upload Vivado timing reports, synthesis logs, etc.</p>
+                        <button type="button" class="upload-btn" onclick="document.getElementById('logFiles').click()">
+                            Choose Report Files
+                        </button>
+                        <input type="file" id="logFiles" name="log_files" class="file-input" multiple 
+                               accept=".rpt,.log,.txt,.out">
+                        <div id="logFileList" class="file-list"></div>
+                    </div>
+
+                    <div class="analyze-section">
+                        <button type="submit" class="analyze-btn" id="analyzeBtn" disabled>
+                            🚀 Analyze Design
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="chat-section">
+                <div class="chat-header">
+                    <h3>💬 AI Assistant</h3>
+                    <p>Chat with AI to get help fixing timing issues</p>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai">
+                        <strong>AI Assistant:</strong> Hi! Upload your code files and timing reports, then I can help you analyze and fix timing violations. You can also ask me questions about FPGA design and timing closure techniques.
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <div class="chat-input-box">
+                        <input type="text" id="chatInput" placeholder="Ask about timing issues, HDL optimization..." 
+                               onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button class="chat-send-btn" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let codeFiles = [];
+        let logFiles = [];
+
+        // File upload handling
+        document.getElementById('codeFiles').addEventListener('change', function(e) {
+            handleFileSelection(e.target.files, 'code');
+        });
+
+        document.getElementById('logFiles').addEventListener('change', function(e) {
+            handleFileSelection(e.target.files, 'log');
+        });
+
+        function handleFileSelection(files, type) {
+            const fileArray = type === 'code' ? codeFiles : logFiles;
+            const listElement = type === 'code' ? 'codeFileList' : 'logFileList';
+            
+            for(let file of files) {
+                if(!fileArray.find(f => f.name === file.name)) {
+                    fileArray.push(file);
+                }
+            }
+            
+            updateFileList(fileArray, listElement, type);
+            updateAnalyzeButton();
+        }
+
+        function updateFileList(files, listElementId, type) {
+            const listElement = document.getElementById(listElementId);
+            listElement.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${file.name}</span>
+                    <button type="button" class="remove-file" onclick="removeFile(${index}, '${type}')">
+                        Remove
+                    </button>
+                `;
+                listElement.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index, type) {
+            if(type === 'code') {
+                codeFiles.splice(index, 1);
+                updateFileList(codeFiles, 'codeFileList', 'code');
+            } else {
+                logFiles.splice(index, 1);
+                updateFileList(logFiles, 'logFileList', 'log');
+            }
+            updateAnalyzeButton();
+        }
+
+        function updateAnalyzeButton() {
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            analyzeBtn.disabled = logFiles.length === 0;
+        }
+
+        // Drag and drop functionality
+        ['codeUpload', 'logUpload'].forEach(id => {
+            const element = document.getElementById(id);
+            
+            element.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                element.classList.add('dragover');
+            });
+            
+            element.addEventListener('dragleave', function(e) {
+                element.classList.remove('dragover');
+            });
+            
+            element.addEventListener('drop', function(e) {
+                e.preventDefault();
+                element.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                const type = id === 'codeUpload' ? 'code' : 'log';
+                handleFileSelection(files, type);
+            });
+        });
+
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if(!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Send to backend
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    code_files: codeFiles.map(f => f.name),
+                    log_files: logFiles.map(f => f.name)
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessage(data.response, 'ai');
+            })
+            .catch(error => {
+                addMessage('Sorry, I encountered an error. Please try again.', 'ai');
+            });
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = `<strong>${sender === 'user' ? 'You' : 'AI Assistant'}:</strong> ${text}`;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Form submission with file handling
+        document.getElementById('analysisForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            
+            // Add code files
+            codeFiles.forEach(file => {
+                formData.append('code_files', file);
+            });
+            
+            // Add log files  
+            logFiles.forEach(file => {
+                formData.append('log_files', file);
+            });
+            
+            // Submit form
+            fetch('/analyze', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if(response.ok) {
+                    window.location.href = '/results';
+                } else {
+                    alert('Analysis failed. Please check your files and try again.');
+                }
+            })
+            .catch(error => {
+                alert('Upload failed. Please try again.');
+            });
+        });
+    </script>
 </body>
 </html>

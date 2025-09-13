@@ -2,30 +2,412 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clkwise - Analysis Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(90deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 0;
+            min-height: 600px;
+        }
+        .results-section {
+            padding: 30px;
+            background: #f8f9fa;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .summary-card h3 {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .summary-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .wns-value {
+            color: {{ '#dc3545' if summary.wns and summary.wns < 0 else '#28a745' }};
+        }
+        .tns-value {
+            color: {{ '#dc3545' if summary.tns and summary.tns < 0 else '#28a745' }};
+        }
+        .paths-value {
+            color: #667eea;
+        }
+        .violations-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .violations-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .violation-item {
+            background: #f8f9fa;
+            border-left: 4px solid #dc3545;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .violation-header {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .violation-metric {
+            text-align: center;
+        }
+        .violation-metric .label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .violation-metric .value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        .path-info {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .path-info h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .suggestions {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .suggestions h4 {
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .suggestions ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .suggestions li {
+            background: white;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 3px;
+            border-left: 3px solid #007bff;
+        }
+        .chat-section {
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 20px;
+            background: #34495e;
+            border-bottom: 1px solid #4a5f7a;
+        }
+        .chat-header h3 {
+            font-size: 1.4em;
+            margin-bottom: 5px;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 500px;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            max-width: 85%;
+        }
+        .message.user {
+            background: #667eea;
+            margin-left: auto;
+        }
+        .message.ai {
+            background: #4a5f7a;
+            margin-right: auto;
+        }
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid #4a5f7a;
+        }
+        .chat-input-box {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input-box input {
+            flex: 1;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+        }
+        .chat-send-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .back-btn {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 20px;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .back-btn:hover {
+            transform: translateY(-2px);
+        }
+        .file-info {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .file-info h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .file-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .file-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #007bff;
+        }
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Timing Report Analysis Results</h1>
-    <p>WNS: {{ summary.wns }}</p>
-    <p>TNS: {{ summary.tns }}</p>
-    <h2>Violations (showing up to 10)</h2>
-    <ul>
-    {% for v in violations[:10] %}
-        <li>
-            <strong>Slack:</strong> {{ v.slack }}<br>
-            <strong>Levels of Logic:</strong> {{ v.levels_of_logic }}<br>
-            <strong>Routing %:</strong> {{ v.routing_pct }}<br>
-            <strong>Startpoint:</strong> {{ v.startpoint }}<br>
-            <strong>Endpoint:</strong> {{ v.endpoint }}<br>
-            <strong>Suggestions:</strong>
-            <ul>
-            {% for tip in v.tips %}
-                <li>{{ tip }}</li>
-            {% endfor %}
-            </ul>
-        </li>
-    {% endfor %}
-    </ul>
-    <a href="{{ url_for('upload_form') }}">Upload another report</a>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Analysis Results</h1>
+            <p>Timing Analysis Complete</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="results-section">
+                {% if code_files or log_files %}
+                <div class="file-info">
+                    <h3>📁 Analyzed Files</h3>
+                    <div class="file-list">
+                        {% for file in code_files %}
+                        <div class="file-item">
+                            <strong>Code:</strong> {{ file }}
+                        </div>
+                        {% endfor %}
+                        {% for file in log_files %}
+                        <div class="file-item">
+                            <strong>Report:</strong> {{ file }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Worst Negative Slack</h3>
+                        <div class="value wns-value">{{ summary.wns if summary.wns is not none else 'N/A' }}</div>
+                        <small>{{ 'VIOLATED' if summary.wns and summary.wns < 0 else 'MET' if summary.wns else '' }}</small>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Negative Slack</h3>
+                        <div class="value tns-value">{{ summary.tns if summary.tns is not none else 'N/A' }}</div>
+                        <small>{{ 'VIOLATED' if summary.tns and summary.tns < 0 else 'MET' if summary.tns else '' }}</small>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Violation Paths</h3>
+                        <div class="value paths-value">{{ violations|length }}</div>
+                        <small>{{ 'CRITICAL' if violations|length > 10 else 'MODERATE' if violations|length > 0 else 'NONE' }}</small>
+                    </div>
+                </div>
+
+                {% if violations %}
+                <div class="violations-section">
+                    <h2>🚨 Top Violations (showing {{ [violations|length, 10]|min }} of {{ violations|length }})</h2>
+                    {% for v in violations[:10] %}
+                    <div class="violation-item">
+                        <div class="violation-header">
+                            <div class="violation-metric">
+                                <div class="label">Slack</div>
+                                <div class="value">{{ v.slack if v.slack is not none else 'N/A' }}</div>
+                            </div>
+                            <div class="violation-metric">
+                                <div class="label">Logic Levels</div>
+                                <div class="value">{{ v.levels_of_logic if v.levels_of_logic is not none else 'N/A' }}</div>
+                            </div>
+                            <div class="violation-metric">
+                                <div class="label">Routing %</div>
+                                <div class="value">{{ v.routing_pct if v.routing_pct is not none else 'N/A' }}%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="path-info">
+                            <h4>📍 Path Details</h4>
+                            <p><strong>From:</strong> {{ v.startpoint if v.startpoint else 'Unknown' }}</p>
+                            <p><strong>To:</strong> {{ v.endpoint if v.endpoint else 'Unknown' }}</p>
+                        </div>
+                        
+                        {% if v.tips %}
+                        <div class="suggestions">
+                            <h4>💡 AI Suggestions</h4>
+                            <ul>
+                            {% for tip in v.tips %}
+                                <li>{{ tip }}</li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="violations-section">
+                    <h2>✅ No Timing Violations Found</h2>
+                    <p>Your design meets timing requirements!</p>
+                </div>
+                {% endif %}
+                
+                <a href="{{ url_for('upload_form') }}" class="back-btn">🔄 Analyze Another Design</a>
+            </div>
+
+            <div class="chat-section">
+                <div class="chat-header">
+                    <h3>💬 AI Assistant</h3>
+                    <p>Ask questions about the results</p>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai">
+                        <strong>AI Assistant:</strong> I've analyzed your timing report. I can help explain the violations, suggest specific fixes, or answer questions about FPGA timing closure. What would you like to know?
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <div class="chat-input-box">
+                        <input type="text" id="chatInput" placeholder="Ask about violations, fixes, or FPGA design..." 
+                               onkeypress="if(event.key==='Enter') sendMessage()">
+                        <button class="chat-send-btn" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if(!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Send to backend with analysis context
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    context: 'results',
+                    analysis_data: {
+                        wns: {{ summary.wns|tojson }},
+                        tns: {{ summary.tns|tojson }},
+                        violation_count: {{ violations|length }},
+                        violations: {{ violations[:3]|tojson }}
+                    }
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessage(data.response, 'ai');
+            })
+            .catch(error => {
+                addMessage('Sorry, I encountered an error. Please try again.', 'ai');
+            });
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = `<strong>${sender === 'user' ? 'You' : 'AI Assistant'}:</strong> ${text}`;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    </script>
 </body>
 </html>
