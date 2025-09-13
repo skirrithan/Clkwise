@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Clkwise - Analysis Results</title>
+</head>
+<body>
+    <h1>Timing Report Analysis Results</h1>
+    <p>WNS: {{ summary.wns }}</p>
+    <p>TNS: {{ summary.tns }}</p>
+    <h2>Violations (showing up to 10)</h2>
+    <ul>
+    {% for v in violations[:10] %}
+        <li>
+            <strong>Slack:</strong> {{ v.slack }}<br>
+            <strong>Levels of Logic:</strong> {{ v.levels_of_logic }}<br>
+            <strong>Routing %:</strong> {{ v.routing_pct }}<br>
+            <strong>Startpoint:</strong> {{ v.startpoint }}<br>
+            <strong>Endpoint:</strong> {{ v.endpoint }}<br>
+            <strong>Suggestions:</strong>
+            <ul>
+            {% for tip in v.tips %}
+                <li>{{ tip }}</li>
+            {% endfor %}
+            </ul>
+        </li>
+    {% endfor %}
+    </ul>
+    <a href="{{ url_for('upload_form') }}">Upload another report</a>
+</body>
+</html>
