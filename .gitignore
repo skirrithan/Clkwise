@@ -28,4 +28,24 @@ data/
 # Ignore system files
 .DS_Store
 Thumbs.db
-desktop.ini
+desktop.ini# Python cache files
+__pycache__/
+*.py[cod]
+*.class
+
+# Flask session files
+flask_session/
+
+# Temporary upload files
+temp_uploads/
+
+# Environment files
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/
+
+# macOS files
+.DS_Store
