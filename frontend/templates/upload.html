@@ -1,0 +1,2403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLKWISE - AI FPGA TIMING DEBUGGER</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --primary-bg: #000000;
+            --secondary-bg: #111111;
+            --tertiary-bg: #333333;
+            --text-primary: #ffffff;
+            --text-secondary: #737373;
+            --accent-yellow: #FFD700;
+            --accent-blue: #0057B8;
+            --accent-green: #999999;
+            --border-color: #333333;
+            --hover-bg: rgba(255, 255, 255, 0.07);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        ::selection {
+            background-color: var(--accent-yellow);
+            color: #000;
+        }
+        
+        ::-moz-selection {
+            background-color: var(--accent-yellow);
+            color: #000;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--primary-bg);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-size: 20px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 1279.98px) {
+            body {
+                font-size: 14px;
+            }
+        }
+        /* Site Loader */
+        #site-loader {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background-color: var(--primary-bg);
+            opacity: 1;
+            transition: opacity ease 1s;
+            z-index: 20000;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        body.loaded #site-loader {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loader-content {
+            text-align: center;
+        }
+        
+        .loader-logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        
+        .loader-bars {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            align-items: flex-end;
+            height: 40px;
+        }
+        
+        .loader-bar {
+            width: 4px;
+            background: var(--accent-yellow);
+            animation: loader-pulse 1s ease-in-out infinite alternate;
+        }
+        
+        .loader-bar:nth-child(1) { animation-delay: 0.1s; }
+        .loader-bar:nth-child(2) { animation-delay: 0.2s; }
+        .loader-bar:nth-child(3) { animation-delay: 0.3s; }
+        .loader-bar:nth-child(4) { animation-delay: 0.4s; }
+        .loader-bar:nth-child(5) { animation-delay: 0.5s; }
+        
+        @keyframes loader-pulse {
+            0% { height: 10px; }
+            100% { height: 40px; }
+        }
+        
+        /* Typing Animation Banner - Fullscreen */
+        .typing-banner {
+            background: linear-gradient(135deg, var(--primary-bg) 0%, var(--secondary-bg) 100%);
+            min-height: calc(100vh - 120px); /* Account for header height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .typing-banner::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .typing-content {
+            max-width: 900px;
+            padding: 60px 40px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .typing-title {
+            font-family: 'Inter', sans-serif;
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+        
+        .typing-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--text-primary);
+            letter-spacing: 0.5px;
+            min-height: 30px;
+            line-height: 1.4;
+            margin-bottom: 60px;
+        }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: bounce 2s infinite;
+        }
+        
+        .scroll-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .scroll-arrow {
+            width: 2px;
+            height: 30px;
+            background: var(--accent-yellow);
+            position: relative;
+        }
+        
+        .scroll-arrow::after {
+            content: "";
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 12px solid var(--accent-yellow);
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+        
+        @media (max-width: 639.98px) {
+            .typing-banner {
+                min-height: calc(100vh - 90px);
+            }
+            
+            .typing-content {
+                padding: 40px 20px;
+            }
+            
+            .typing-title {
+                font-size: 32px;
+                margin-bottom: 30px;
+            }
+            
+            .typing-text {
+                font-size: 18px;
+                min-height: 24px;
+                margin-bottom: 40px;
+            }
+            
+            .scroll-indicator {
+                bottom: 20px;
+            }
+        }
+        
+        .cursor {
+            display: inline-block;
+            background-color: var(--accent-yellow);
+            width: 2px;
+            height: 1.2em;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .page-wrapper {
+            min-height: 100vh;
+            background: var(--primary-bg);
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .top-bar {
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .top-bar-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .top-bar-content {
+                padding: 0 15px;
+            }
+        }
+        
+        .gov-notice {
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            position: relative;
+            padding-left: 0;
+        }
+        
+        
+        .language-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .lang-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 400;
+            transition: color 0.5s ease;
+        }
+        
+        .lang-link.active,
+        .lang-link:hover {
+            color: var(--text-primary);
+        }
+        
+        .lang-divider {
+            color: var(--text-secondary);
+        }
+        .main-nav {
+            background: var(--primary-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        @media (max-width: 639.98px) {
+            .main-nav {
+                padding: 15px 0;
+            }
+        }
+        
+        .nav-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .nav-content {
+                padding: 0 15px;
+            }
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+        
+        @media (max-width: 639.98px) {
+            .logo {
+                font-size: 24px;
+            }
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            align-items: center;
+        }
+        
+        @media (max-width: 991.98px) {
+            .nav-links {
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 639.98px) {
+            .nav-links {
+                display: none;
+            }
+        }
+        
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            transition: color 0.5s ease;
+            white-space: nowrap;
+        }
+        
+        .nav-link:hover,
+        .nav-link:focus-visible,
+        .nav-link.active {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        @media (max-width: 1279.98px) {
+            .nav-link {
+                font-size: 14px;
+            }
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 25px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .container {
+                padding: 0 15px;
+            }
+        }
+        
+        .hero-section {
+            background: var(--primary-bg);
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .hero-section {
+                padding: 40px 0 30px;
+            }
+        }
+        
+        .hero-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            letter-spacing: -0.02em;
+            line-height: 1.12;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        @media (max-width: 639.98px) {
+            .hero-title {
+                font-size: 20px;
+                margin-bottom: 14px;
+                line-height: 1.13;
+            }
+        }
+        
+        .hero-subtitle {
+            font-size: 18px;
+            color: var(--text-primary);
+            max-width: 856px;
+            margin: 0 auto 36px;
+            font-weight: 400;
+            line-height: 1.22;
+        }
+        
+        @media (max-width: 639.98px) {
+            .hero-subtitle {
+                font-size: 16px;
+                margin-bottom: 25px;
+            }
+        }
+        .main-section {
+            background: var(--primary-bg);
+            padding: 80px 0;
+            min-height: 60vh;
+        }
+        
+        .upload-section {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            margin: 40px 0;
+            border-radius: 0;
+            overflow: hidden;
+        }
+        
+        .upload-header {
+            background: var(--tertiary-bg);
+            padding: 40px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .upload-header h2 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .upload-content {
+            padding: 40px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .main-section {
+                padding: 40px 0;
+            }
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--text-primary);
+            margin-bottom: 35px;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .section-title {
+                font-size: 20px;
+                margin-bottom: 25px;
+                line-height: 1.10;
+            }
+        }
+        .upload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 24px;
+            margin-bottom: 56px;
+        }
+        .upload-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            padding: 40px 32px;
+            text-align: left;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .upload-card:hover {
+            background: var(--hover-bg);
+            border-color: var(--text-primary);
+        }
+        
+        .upload-card.dragover {
+            border-color: var(--accent-yellow);
+            background: var(--hover-bg);
+            border-width: 2px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .upload-card {
+                padding: 25px 20px;
+            }
+        }
+        .upload-card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .upload-icon {
+            width: 56px;
+            height: 56px;
+            margin-right: 16px;
+            background: var(--tertiary-bg);
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: var(--text-primary);
+        }
+        
+        .upload-card h3 {
+            color: var(--text-primary);
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .upload-card p {
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            font-size: 14px;
+            line-height: 1.4;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-weight: 400;
+        }
+        
+        @media (max-width: 639.98px) {
+            .upload-card p {
+                font-size: 12px;
+                margin-bottom: 20px;
+            }
+        }
+        .file-input {
+            display: none;
+        }
+        .upload-btn {
+            background: var(--text-primary);
+            color: var(--primary-bg);
+            border: 2px solid transparent;
+            padding: 18px 37px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+        
+        .upload-btn:hover:not(:disabled) {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+        }
+        
+        @media (max-width: 639.98px) {
+            .upload-btn {
+                padding: 17px 29px;
+                font-size: 14px;
+                line-height: 21px;
+            }
+        }
+        
+        .primary-btn {
+            background: var(--accent-yellow);
+            color: var(--primary-bg);
+            border: 2px solid transparent;
+            padding: 21px 35px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 240px;
+            min-height: 60px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+        }
+        
+        .primary-btn:hover:not(:disabled) {
+            background: var(--accent-green);
+            color: var(--primary-bg);
+        }
+        
+        .primary-btn:disabled {
+            background: var(--tertiary-bg);
+            color: var(--text-secondary);
+            cursor: not-allowed;
+            opacity: 0.3;
+        }
+        
+        @media (max-width: 639.98px) {
+            .primary-btn {
+                padding: 17px 29px;
+                font-size: 14px;
+                line-height: 21px;
+            }
+        }
+        .file-list {
+            margin-top: 24px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .file-item {
+            background: var(--tertiary-bg);
+            padding: 16px;
+            margin: 8px 0;
+            border-radius: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: background 0.2s ease;
+        }
+        
+        .file-item:hover {
+            background: var(--hover-bg);
+        }
+        .analyze-section {
+            text-align: center;
+            margin-top: 56px;
+            padding: 56px 40px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+        }
+        
+        .analyze-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .analyze-section p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-weight: 400;
+        }
+        
+        @media (max-width: 639.98px) {
+            .analyze-section {
+                padding: 35px 25px;
+                margin-top: 35px;
+            }
+            
+            .analyze-section p {
+                font-size: 12px;
+                margin-bottom: 20px;
+            }
+        }
+        .remove-file {
+            background: var(--text-secondary);
+            color: var(--text-primary);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .remove-file:hover {
+            background: var(--text-primary);
+            color: var(--primary-bg);
+        }
+        .chat-section-wrapper {
+            background: var(--secondary-bg);
+            padding: 80px 0;
+        }
+        
+        @media (max-width: 639.98px) {
+            .chat-section-wrapper {
+                padding: 40px 0;
+            }
+        }
+        
+        .chat-section {
+            background: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .chat-header {
+            padding: 32px 40px 24px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--secondary-bg);
+        }
+        
+        @media (max-width: 639.98px) {
+            .chat-header {
+                padding: 25px 20px 20px;
+            }
+        }
+        
+        .chat-header h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 400;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        @media (max-width: 639.98px) {
+            .chat-header h3 {
+                font-size: 20px;
+                line-height: 1.10;
+            }
+        }
+        
+        .chat-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.4;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        @media (max-width: 639.98px) {
+            .chat-header p {
+                font-size: 12px;
+            }
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 32px 40px;
+            overflow-y: auto;
+            max-height: 400px;
+            background: var(--primary-bg);
+        }
+        
+        @media (max-width: 639.98px) {
+            .chat-messages {
+                padding: 25px 20px;
+            }
+        }
+        .message {
+            margin-bottom: 16px;
+            padding: 14px 18px;
+            border-radius: 0;
+            max-width: 85%;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .message.user {
+            background: var(--text-primary);
+            color: var(--primary-bg);
+            margin-left: auto;
+        }
+        
+        .message.ai {
+            background: var(--tertiary-bg);
+            color: var(--text-primary);
+            margin-right: auto;
+            border: 1px solid var(--border-color);
+        }
+        .chat-input {
+            padding: 24px 40px 32px;
+            border-top: 1px solid var(--border-color);
+            background: var(--secondary-bg);
+        }
+        
+        @media (max-width: 639.98px) {
+            .chat-input {
+                padding: 20px 15px 25px;
+            }
+        }
+        
+        .chat-input-box {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .chat-input-box input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            font-size: 14px;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+        }
+        
+        .chat-input-box input:focus {
+            outline: none;
+            border-color: var(--text-primary);
+        }
+        
+        .chat-input-box input::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .chat-send-btn {
+            background: var(--accent-yellow);
+            color: var(--primary-bg);
+            border: none;
+            padding: 14px 24px;
+            border-radius: 0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.15s ease;
+            min-height: 56px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+        }
+        
+        .chat-send-btn:hover {
+            background: var(--accent-green);
+        }
+        /* Footer */
+        .footer {
+            background: var(--secondary-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0;
+            margin-top: 80px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .footer {
+                padding: 25px 0;
+                margin-top: 40px;
+            }
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        .footer-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .footer-links {
+                gap: 15px;
+            }
+        }
+        
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            transition: color 0.5s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .upload-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Sponsor badges styling */
+        .sponsor-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .sponsor-badge {
+            background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            border: 1px solid var(--border-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .sponsor-badge:hover {
+            background: linear-gradient(135deg, #333333 0%, #444444 100%);
+            transform: translateY(-1px);
+        }
+        
+        .sponsor-badge.cohere {
+            background: linear-gradient(135deg, #39C5BB 0%, #4DD8CE 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge.cerebras {
+            background: linear-gradient(135deg, #FF1744 0%, #FF5722 100%);
+            color: #fff;
+        }
+        
+        .sponsor-badge .icon {
+            font-size: 8px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .sponsor-badge {
+                font-size: 8px;
+                padding: 3px 6px;
+            }
+        }
+        
+        .sponsor-showcase {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .sponsor-showcase h4 {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .model-selector {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .model-selector h4 {
+            color: #999999;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .model-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .model-btn {
+            background: transparent;
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.6;
+        }
+        
+        .model-btn:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+        
+        .model-btn.active {
+            opacity: 1;
+            border-color: #cccccc;
+            box-shadow: 0 0 20px rgba(204, 204, 204, 0.3);
+        }
+        
+        .model-btn .sponsor-badge {
+            margin: 0;
+            border-radius: 10px;
+        }
+        
+        .current-model {
+            margin-top: 10px;
+        }
+        
+        .current-model small {
+            color: #999999;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .dual-analysis-info {
+            margin: 30px 0;
+            text-align: center;
+            padding: 25px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+        }
+        
+        .dual-analysis-info h4 {
+            color: #999999;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        .analysis-pipeline {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .pipeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #cccccc;
+            color: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .pipeline-arrow {
+            color: #cccccc;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .pipeline-description {
+            margin-top: 10px;
+        }
+        
+        .pipeline-description small {
+            color: #999999;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .analysis-pipeline {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .pipeline-arrow {
+                transform: rotate(90deg);
+            }
+        }
+        
+        /* Enhanced results styles */
+        .enhanced-results-section {
+            background: var(--secondary-bg);
+            margin: 40px 0;
+            padding: 40px;
+            border-radius: 0;
+            border: 1px solid var(--border-color);
+        }
+        
+        .results-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .analysis-header {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            padding: 40px;
+            margin-bottom: 40px;
+            border-radius: 0;
+        }
+
+        .analysis-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            line-height: 1.12;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .summary-card {
+            background: var(--tertiary-bg);
+            padding: 30px;
+            border-radius: 0;
+            text-align: center;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .summary-card h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .summary-card .value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .code-changes-section {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: 40px;
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .code-changes-header {
+            background: var(--tertiary-bg);
+            padding: 40px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-changes-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .explanation-content {
+            margin-top: 30px;
+            padding: 25px;
+            background: var(--tertiary-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .code-changes-content {
+            padding: 40px;
+        }
+
+        .quick-facts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .quick-fact {
+            background: var(--tertiary-bg);
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .fix-item {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .fix-header {
+            background: var(--tertiary-bg);
+            padding: 30px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fix-title {
+            font-size: 18px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .fix-content {
+            padding: 30px;
+        }
+
+        .fix-explanation {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .fix-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .fix-metric {
+            background: var(--tertiary-bg);
+            padding: 20px;
+            border-radius: 0;
+            text-align: center;
+        }
+
+        .fix-metric .label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 8px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .fix-metric .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .code-snippet {
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            padding: 25px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-top: 25px;
+        }
+
+        .code-diff {
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin-top: 25px;
+        }
+
+        .diff-line-added {
+            background: rgba(40, 167, 69, 0.2);
+            border-left: 4px solid #28a745;
+            color: #90ee90;
+            padding: 2px 10px;
+        }
+
+        .diff-line-removed {
+            background: rgba(220, 53, 69, 0.2);
+            border-left: 4px solid #dc3545;
+            color: #ffb3b3;
+            padding: 2px 10px;
+        }
+
+        .diff-line-unchanged {
+            color: #e6e6e6;
+            padding: 2px 10px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        .download-btn[style*="background: #28a745"]:hover {
+            background: #218838 !important;
+        }
+        
+        .download-btn[style*="background: #007bff"]:hover {
+            background: #0056b3 !important;
+        }
+        
+        /* Side-by-side code comparison */
+        .code-comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        @media (max-width: 768px) {
+            .code-comparison-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+        
+        .code-panel {
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            overflow: hidden;
+        }
+        
+        .code-panel-header {
+            padding: 15px 25px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .code-panel-header.original {
+            background: rgba(220, 53, 69, 0.1);
+            color: #ffb3b3;
+            border-bottom: 1px solid #dc3545;
+        }
+        
+        .code-panel-header.optimized {
+            background: rgba(40, 167, 69, 0.1);
+            color: #90ee90;
+            border-bottom: 1px solid #28a745;
+        }
+        
+        .code-panel-content {
+            background: #1a1a1a;
+            padding: 25px;
+            font-family: 'Monaco', 'Consolas', monospace;
+font-size: 10px;
+            color: #e6e6e6;
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .code-line {
+            line-height: 1.4;
+            margin-bottom: 2px;
+            white-space: pre;
+        }
+        
+        .code-line-number {
+            color: #666;
+            margin-right: 15px;
+            display: inline-block;
+            min-width: 30px;
+            text-align: right;
+        }
+        
+        .highlight-added {
+            background: rgba(40, 167, 69, 0.2);
+            color: #90ee90;
+        }
+        
+        .highlight-removed {
+            background: rgba(220, 53, 69, 0.2);
+            color: #ffb3b3;
+        }
+        
+        /* Optimized code line-by-line animation */
+        .optimized-line-animate {
+            opacity: 0;
+            transform: translateX(20px);
+            /* Don't auto-animate, wait for JavaScript trigger */
+        }
+        
+        @keyframes slideInLine {
+            0% {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Enhanced highlight for animated lines */
+        .optimized-line-animate.highlight-added {
+            animation: slideInLineHighlighted 0.8s ease-out forwards;
+        }
+        
+        @keyframes slideInLineHighlighted {
+            0% {
+                opacity: 0;
+                transform: translateX(20px);
+                background: rgba(40, 167, 69, 0.4);
+            }
+            50% {
+                opacity: 0.7;
+                background: rgba(40, 167, 69, 0.3);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+                background: rgba(40, 167, 69, 0.2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Site Loader -->
+    <div id="site-loader">
+        <div class="loader-content">
+            <div class="loader-logo">CLKWISE</div>
+            <div class="loader-bars">
+                <div class="loader-bar"></div>
+                <div class="loader-bar"></div>
+                <div class="loader-bar"></div>
+                <div class="loader-bar"></div>
+                <div class="loader-bar"></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="page-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-content">
+                <div class="gov-notice">OFFICIAL FPGA TIMING ANALYSIS PLATFORM</div>
+                <div class="language-selector">
+                    <a href="#" class="lang-link active">EN</a>
+                    <span class="lang-divider"> · </span>
+                    <a href="#" class="lang-link">FR</a>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="main-nav">
+            <div class="nav-content">
+                <a href="/" class="logo">CLKWISE</a>
+                <div class="nav-links">
+                    <a href="/" class="nav-link active">Home</a>
+                    <a href="#" class="nav-link">Projects</a>
+                    <a href="#" class="nav-link">Reports</a>
+                    <a href="/about" class="nav-link">About</a>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Typing Animation Banner -->
+        <div class="typing-banner">
+            <div class="typing-content">
+                <h1 class="typing-title">CLKWISE AI</h1>
+                <div class="typing-text" id="typingText">
+                    <span class="cursor" id="cursor"></span>
+                </div>
+            </div>
+            <div class="scroll-indicator">
+                <div class="scroll-text">SCROLL TO CONTINUE</div>
+                <div class="scroll-arrow"></div>
+            </div>
+        </div>
+        
+        <div class="hero-section">
+            <div class="container">
+                <h1 class="hero-title">AI-POWERED FPGA TIMING ANALYSIS PLATFORM</h1>
+                <p class="hero-subtitle">Upload your hardware design files and timing reports to get intelligent analysis and optimization recommendations for your FPGA timing closure challenges</p>
+                
+                <div class="sponsor-showcase">
+                    <h4>POWERED BY LEADING AI TECHNOLOGIES</h4>
+                    <div class="sponsor-badges">
+                        <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE MULTIMODAL</span>
+                        <span class="sponsor-badge cerebras"><span class="icon">🚀</span> CEREBRAS INFERENCE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-section">
+            <div class="container">
+                <div class="upload-section">
+                    <div class="upload-header">
+                        <h2>HARDWARE ANALYSIS UPLOAD CENTER</h2>
+                    </div>
+                    <div class="upload-content">
+                        <div class="upload-grid">
+                            <form id="analysisForm" action="/analyze" method="post" enctype="multipart/form-data">
+                                <!-- Code Files Upload -->
+                                <div class="upload-card" id="codeUpload">
+                                    <div class="upload-card-header">
+                                        <div class="upload-icon">HD</div>
+                                        <h3>HDL Design Files</h3>
+                                    </div>
+                                    <p>VERILOG, SYSTEMVERILOG, VHDL CODE ANALYSIS. SUPPORTED: .V, .SV, .VHD, .VHDL</p>
+                                    <button type="button" class="upload-btn" onclick="document.getElementById('codeFiles').click()">
+                                        <span>Choose Files</span>
+                                    </button>
+                                    <input type="file" id="codeFiles" name="code_files" class="file-input" multiple 
+                                           accept=".v,.sv,.vhd,.vhdl,.vh,.svh">
+                                    <div id="codeFileList" class="file-list"></div>
+                                </div>
+
+                                <!-- Timing Reports Upload -->
+                                <div class="upload-card" id="logUpload">
+                                    <div class="upload-card-header">
+                                        <div class="upload-icon">TR</div>
+                                        <h3>Timing Reports & Analysis</h3>
+                                    </div>
+                                    <p>VIVADO REPORTS, SYNTHESIS LOGS, EDA ANALYSIS. SUPPORTED: .RPT, .LOG, .TXT</p>
+                                    <button type="button" class="upload-btn" onclick="document.getElementById('logFiles').click()">
+                                        <span>Choose Files</span>
+                                    </button>
+                                    <input type="file" id="logFiles" name="log_files" class="file-input" multiple 
+                                           accept=".rpt,.log,.txt,.out">
+                                    <div id="logFileList" class="file-list"></div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="analyze-section">
+                            <h3>ANALYSIS READY</h3>
+                            <p>UPLOAD TIMING REPORTS TO BEGIN DUAL AI ANALYSIS</p>
+                            <div class="dual-analysis-info">
+                                <h4>DUAL MODEL ANALYSIS PIPELINE:</h4>
+                                <div class="analysis-pipeline">
+                                    <div class="pipeline-step">
+                                        <span class="step-number">1</span>
+                                        <span class="sponsor-badge cerebras"><span class="icon">🚀</span> CEREBRAS ANALYSIS</span>
+                                    </div>
+                                    <div class="pipeline-arrow">→</div>
+                                    <div class="pipeline-step">
+                                        <span class="step-number">2</span>
+                                        <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE REFINEMENT</span>
+                                    </div>
+                                </div>
+                                <div class="pipeline-description">
+                                    <small>COMPREHENSIVE ANALYSIS USING BOTH AI MODELS SEQUENTIALLY</small>
+                                </div>
+                            </div>
+                            <button type="submit" form="analysisForm" class="primary-btn" id="analyzeBtn" disabled>
+                                START DUAL ANALYSIS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Enhanced Results Section (Hidden initially) -->
+                <div class="enhanced-results-section" id="enhancedResultsSection" style="display: none;">
+                    <!-- Code Changes (moved to top) -->
+                    <div class="code-changes-section">
+                        <div class="code-changes-header">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                                <h3 style="margin: 0;">GENERATED CODE CHANGES</h3>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+<button onclick="downloadVerilog()" class="download-btn" style="background: #007bff; color: white; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; padding: 10px 16px; cursor: pointer; text-transform: uppercase; transition: background 0.2s ease; font-family: inherit;">💾 DOWNLOAD VERILOG</button>
+<button onclick="downloadJSON()" class="download-btn" style="background: #28a745; color: white; border: none; border-radius: 6px; font-size: 10px; font-weight: 600; padding: 10px 16px; cursor: pointer; text-transform: uppercase; transition: background 0.2s ease; font-family: inherit;">📥 DOWNLOAD JSON</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="code-changes-content" id="codeChangesContent">
+                            <!-- Code changes will be populated by JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="results-header">
+                        <h3>AI-ENHANCED TIMING ANALYSIS</h3>
+                    </div>
+                    
+                    <!-- Analysis Header -->
+                    <div class="analysis-header" id="analysisHeader">
+                        <div class="analysis-title" id="analysisTitle">Loading...</div>
+                        <div class="analysis-status" id="analysisStatus">Unknown</div>
+                        
+                        <div class="summary-grid">
+                            <div class="summary-card">
+                                <h3>WORST NEGATIVE SLACK</h3>
+                                <div class="value" id="wnsValue">Loading...</div>
+                                <div class="unit">nanoseconds</div>
+                            </div>
+                            <div class="summary-card">
+                                <h3>CLOCK FREQUENCY</h3>
+                                <div class="value" id="frequencyValue">Loading...</div>
+                                <div class="unit">MHz</div>
+                            </div>
+                            <div class="summary-card">
+                                <h3>TOTAL FIXES</h3>
+                                <div class="value" id="fixesCount">Loading...</div>
+                                <div class="unit">suggested</div>
+                            </div>
+                            <div class="summary-card">
+                                <h3>LATENCY IMPACT</h3>
+                                <div class="value" id="latencyImpact">Loading...</div>
+                                <div class="unit">cycles</div>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Analysis Content -->
+                        <div class="explanation-content">
+                            <div id="explanationText">Loading detailed analysis...</div>
+                            <div class="quick-facts" id="quickFacts">
+                                <!-- Quick facts will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-metrics">
+                        <div class="metric-card">
+                            <div class="metric-label">WNS IMPROVEMENT</div>
+                            <div class="metric-value improvement">+1.2ns</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">LOGIC LEVELS</div>
+                            <div class="metric-value improvement">8 → 3</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">FMAX IMPROVEMENT</div>
+                            <div class="metric-value improvement">+43 MHz</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">CONFIDENCE</div>
+                            <div class="metric-value">95%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-section-wrapper">
+            <div class="container">
+                <div class="chat-section">
+                    <div class="chat-header">
+                        <h3>AI TIMING EXPERT</h3>
+                        <p>GET PROFESSIONAL GUIDANCE ON TIMING CLOSURE & FPGA OPTIMIZATION</p>
+                        <div class="model-selector">
+                            <h4>CHOOSE AI MODEL:</h4>
+                            <div class="model-buttons">
+                                <button class="model-btn active" data-model="cerebras" id="cerebrasBtn">
+                                    <span class="sponsor-badge cerebras"><span class="icon">🚀</span> CEREBRAS</span>
+                                </button>
+                                <button class="model-btn" data-model="cohere" id="cohereBtn">
+                                    <span class="sponsor-badge cohere"><span class="icon">🧠</span> COHERE</span>
+                                </button>
+                            </div>
+                            <div class="current-model">
+                                <small id="currentModelText">USING CEREBRAS INFERENCE</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai">
+                            <strong>AI Expert:</strong> READY TO ANALYZE YOUR FPGA TIMING CHALLENGES. UPLOAD YOUR FILES AND I'LL PROVIDE TARGETED OPTIMIZATION RECOMMENDATIONS.
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <div class="chat-input-box">
+                            <input type="text" id="chatInput" placeholder="ASK ABOUT TIMING VIOLATIONS, OPTIMIZATION STRATEGIES, HDL BEST PRACTICES..." 
+                                   onkeypress="if(event.key==='Enter') sendMessage()">
+                            <button class="chat-send-btn" onclick="sendMessage()">SEND</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-text">CLKWISE AI FPGA TIMING ANALYSIS PLATFORM</div>
+                    <div class="footer-links">
+                        <a href="#" class="footer-link">About</a>
+                        <a href="#" class="footer-link">Documentation</a>
+                        <a href="#" class="footer-link">Support</a>
+                        <a href="#" class="footer-link">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Site loader
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.body.classList.add('loaded');
+                // Start typing animation after loader
+                setTimeout(startTypingAnimation, 500);
+            }, 1500);
+        });
+        
+        // Typing Animation
+        function startTypingAnimation() {
+            const messages = [
+                "Hi I'm Clkwise! Your AI-powered FPGA timing analysis assistant.",
+                "I specialize in identifying and fixing timing violations in digital designs.",
+                "Upload your HDL files and timing reports to get intelligent analysis.",
+                "Let's achieve perfect timing closure for your FPGA designs together.",
+                "Ready to optimize your digital circuits? Scroll down to get started!"
+            ];
+            
+            let messageIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+            const typingText = document.getElementById('typingText');
+            const cursor = document.getElementById('cursor');
+            
+            function type() {
+                const currentMessage = messages[messageIndex];
+                
+                if (isDeleting) {
+                    // Deleting characters
+                    typingText.textContent = currentMessage.substring(0, charIndex - 1);
+                    charIndex--;
+                    
+                    if (charIndex === 0) {
+                        isDeleting = false;
+                        messageIndex = (messageIndex + 1) % messages.length;
+                        setTimeout(type, 500); // Pause before typing next message
+                        return;
+                    }
+                } else {
+                    // Typing characters
+                    typingText.textContent = currentMessage.substring(0, charIndex + 1);
+                    charIndex++;
+                    
+                    if (charIndex === currentMessage.length) {
+                        // Message complete, pause then start deleting
+                        setTimeout(() => {
+                            isDeleting = true;
+                            type();
+                        }, 3000); // Display message for 3 seconds
+                        return;
+                    }
+                }
+                
+                // Add cursor back
+                typingText.appendChild(cursor);
+                
+                // Typing speed
+                const speed = isDeleting ? 50 : 80;
+                setTimeout(type, speed);
+            }
+            
+            type();
+        }
+        
+        let codeFiles = [];
+        let logFiles = [];
+
+        // File upload handling
+        document.getElementById('codeFiles').addEventListener('change', function(e) {
+            handleFileSelection(e.target.files, 'code');
+        });
+
+        document.getElementById('logFiles').addEventListener('change', function(e) {
+            handleFileSelection(e.target.files, 'log');
+        });
+
+        function handleFileSelection(files, type) {
+            const fileArray = type === 'code' ? codeFiles : logFiles;
+            const listElement = type === 'code' ? 'codeFileList' : 'logFileList';
+            
+            for(let file of files) {
+                if(!fileArray.find(f => f.name === file.name)) {
+                    fileArray.push(file);
+                }
+            }
+            
+            updateFileList(fileArray, listElement, type);
+            updateAnalyzeButton();
+        }
+
+        function updateFileList(files, listElementId, type) {
+            const listElement = document.getElementById(listElementId);
+            listElement.innerHTML = '';
+            
+            files.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${file.name}</span>
+                    <button type="button" class="remove-file" onclick="removeFile(${index}, '${type}')">
+                        Remove
+                    </button>
+                `;
+                listElement.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index, type) {
+            if(type === 'code') {
+                codeFiles.splice(index, 1);
+                updateFileList(codeFiles, 'codeFileList', 'code');
+            } else {
+                logFiles.splice(index, 1);
+                updateFileList(logFiles, 'logFileList', 'log');
+            }
+            updateAnalyzeButton();
+        }
+
+        function updateAnalyzeButton() {
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            analyzeBtn.disabled = logFiles.length === 0;
+        }
+
+        // Drag and drop functionality
+        ['codeUpload', 'logUpload'].forEach(id => {
+            const element = document.getElementById(id);
+            
+            element.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                element.classList.add('dragover');
+            });
+            
+            element.addEventListener('dragleave', function(e) {
+                element.classList.remove('dragover');
+            });
+            
+            element.addEventListener('drop', function(e) {
+                e.preventDefault();
+                element.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                const type = id === 'codeUpload' ? 'code' : 'log';
+                handleFileSelection(files, type);
+            });
+        });
+
+        // Model selector functionality
+        let currentModel = 'cerebras'; // Default model for chat
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Chat model selector event handlers
+            document.getElementById('cerebrasBtn').addEventListener('click', function() {
+                setActiveModel('cerebras');
+            });
+            
+            document.getElementById('cohereBtn').addEventListener('click', function() {
+                setActiveModel('cohere');
+            });
+        });
+        
+        function setActiveModel(model) {
+            currentModel = model;
+            
+            // Update button states (only chat model buttons)
+            document.getElementById('cerebrasBtn').classList.remove('active');
+            document.getElementById('cohereBtn').classList.remove('active');
+            document.getElementById(model + 'Btn').classList.add('active');
+            
+            // Update current model text
+            const modelNames = {
+                'cerebras': 'USING CEREBRAS INFERENCE',
+                'cohere': 'USING COHERE ANALYSIS'
+            };
+            document.getElementById('currentModelText').textContent = modelNames[model];
+        }
+        
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if(!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Send to backend with selected model
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    code_files: codeFiles.map(f => f.name),
+                    log_files: logFiles.map(f => f.name),
+                    preferred_model: currentModel
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                addMessage(data.response, 'ai');
+            })
+            .catch(error => {
+                addMessage('Sorry, I encountered an error. Please try again.', 'ai');
+            });
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = `<strong>${sender === 'user' ? 'You' : 'AI Assistant'}:</strong> ${text}`;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Form submission with file handling
+        document.getElementById('analysisForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show analysis in progress
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const originalText = analyzeBtn.textContent;
+            analyzeBtn.textContent = 'ANALYZING...';
+            analyzeBtn.disabled = true;
+            
+            // Simulate dual AI analysis process
+            setTimeout(function() {
+                showCodeComparison();
+                analyzeBtn.textContent = originalText;
+                analyzeBtn.disabled = false;
+            }, 2000); // Simulate 2 second analysis time
+        });
+        
+        function showCodeComparison() {
+            const enhancedResultsSection = document.getElementById('enhancedResultsSection');
+            
+            // Load enhanced analysis data
+            loadEnhancedAnalysisData();
+            
+            // Show the section with animation
+            enhancedResultsSection.style.display = 'block';
+            enhancedResultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        
+        // Enhanced Results Functions
+        async function loadEnhancedAnalysisData() {
+            try {
+                // Load summary data
+                const summaryResponse = await fetch('/api/analysis/summary');
+                const summaryData = await summaryResponse.json();
+                
+                if (summaryData.status === 'success') {
+                    populateSummary(summaryData.summary);
+                }
+
+                // Fixes section removed - no longer loading fix data
+
+                // Load code changes
+                const codeResponse = await fetch('/api/analysis/code');
+                const codeData = await codeResponse.json();
+                
+                if (codeData.status === 'success') {
+                    populateCodeChanges(codeData.code_changes, codeData.artifacts);
+                }
+
+            } catch (error) {
+                console.error('Error loading analysis data:', error);
+            }
+        }
+        
+        function populateSummary(summary) {
+            document.getElementById('analysisTitle').textContent = summary.header?.title || 'Timing Analysis';
+            
+            const statusElement = document.getElementById('analysisStatus');
+            statusElement.textContent = (summary.severity || 'unknown').toUpperCase();
+            statusElement.className = `analysis-status ${summary.severity || 'unknown'}`;
+
+            document.getElementById('wnsValue').textContent = summary.header?.wns ? summary.header.wns.toFixed(3) : 'N/A';
+            document.getElementById('frequencyValue').textContent = summary.header?.frequency || 'N/A';
+            document.getElementById('fixesCount').textContent = summary.fix_count || 0;
+            document.getElementById('latencyImpact').textContent = summary.metrics?.total_latency || 0;
+
+            document.getElementById('explanationText').textContent = summary.explanation || 'No detailed explanation available.';
+
+            const quickFactsContainer = document.getElementById('quickFacts');
+            quickFactsContainer.innerHTML = '';
+            
+            if (summary.quick_facts && summary.quick_facts.length > 0) {
+                summary.quick_facts.forEach(fact => {
+                    const factDiv = document.createElement('div');
+                    factDiv.className = 'quick-fact';
+                    factDiv.textContent = fact;
+                    quickFactsContainer.appendChild(factDiv);
+                });
+            }
+        }
+        
+        // populateFixes function removed - fixes section no longer exists
+        
+        function populateCodeChanges(codeChanges, artifacts) {
+            const container = document.getElementById('codeChangesContent');
+            
+            if (!codeChanges || codeChanges.files_modified?.length === 0) {
+                container.innerHTML = '<p>No code changes generated.</p>';
+                return;
+            }
+
+            let html = '';
+            
+            if (codeChanges.files_modified && codeChanges.files_modified.length > 0) {
+                html += '<h4>Modified Files:</h4>';
+                codeChanges.files_modified.forEach(file => {
+                    html += `<div class="file-modified">${file}</div>`;
+                });
+            }
+
+            if (codeChanges.diff || artifacts?.top_sv?.content) {
+                html += '<h4>Code Changes (Side-by-Side Comparison):</h4>';
+                html += `<div id="sideByLoadingPlaceholder" style="padding: 40px; text-align: center; color: var(--text-secondary);">
+                    <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border-color); border-top: 2px solid var(--accent-yellow); border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px;"></div>
+                    Loading optimized code with line-by-line animation...
+                </div>`;
+            }
+
+            if (codeChanges.changes_summary) {
+                const summary = codeChanges.changes_summary;
+                html += '<div style="background: var(--tertiary-bg); padding: 15px; border-radius: 6px; margin-top: 20px;">';
+                html += '<div style="font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary);">Change Summary</div>';
+                html += `<p><strong>Original:</strong> ${summary.original_lines} lines | <strong>New:</strong> ${summary.new_lines} lines | <strong>Added:</strong> +${summary.lines_added} lines</p>`;
+                html += '</div>';
+            }
+
+            if (artifacts?.top_sv?.ui?.text) {
+                html += '<h4>Complete Generated File (top.sv):</h4>';
+                html += `<div class="code-snippet" style="max-height: 400px; overflow-y: auto;"><pre>${escapeHtml(artifacts.top_sv.ui.text)}</pre></div>`;
+            }
+
+            container.innerHTML = html || '<p>No code changes available.</p>';
+            
+            // If we have code comparison to show, load it asynchronously
+            if (codeChanges.diff || artifacts?.top_sv?.content) {
+                createSideBySideView(codeChanges.diff, artifacts).then(comparisonHtml => {
+                    const placeholder = document.getElementById('sideByLoadingPlaceholder');
+                    if (placeholder) {
+                        placeholder.innerHTML = comparisonHtml;
+                        // Trigger the line-by-line animation for optimized code
+                        setTimeout(() => {
+                            triggerOptimizedCodeAnimation();
+                        }, 500); // Small delay to let the DOM update
+                    }
+                }).catch(error => {
+                    console.error('Error creating side-by-side view:', error);
+                    const placeholder = document.getElementById('sideByLoadingPlaceholder');
+                    if (placeholder) {
+                        placeholder.innerHTML = '<p>Error loading code comparison.</p>';
+                    }
+                });
+            }
+        }
+        
+        async function createSideBySideView(diffText, artifacts) {
+            // Fetch original top.sv content (problematic version) from the API
+            let originalCode = '';
+            try {
+                const response = await fetch('/api/original/top.sv');
+                const data = await response.json();
+                if (data.status === 'success') {
+                    originalCode = data.content;
+                } else {
+                    console.error('Failed to fetch original top.sv:', data.error);
+                    originalCode = '// Error: Could not load original top.sv file';
+                }
+            } catch (error) {
+                console.error('Error fetching original top.sv:', error);
+                originalCode = '// Error: Could not load original top.sv file';
+            }
+            
+            // Fetch optimized top.sv content (timing-fixed version) from the API
+            let optimizedCode = '';
+            try {
+                const response = await fetch('/api/optimized/top.sv');
+                const data = await response.json();
+                if (data.status === 'success') {
+                    optimizedCode = data.content;
+                } else {
+                    console.error('Failed to fetch optimized top.sv:', data.error);
+                    // Fallback to artifacts if API fails
+                    optimizedCode = artifacts?.top_sv?.content || '// Error: Could not load optimized top.sv file';
+                }
+            } catch (error) {
+                console.error('Error fetching optimized top.sv:', error);
+                // Fallback to artifacts if API fails
+                optimizedCode = artifacts?.top_sv?.content || '// Error: Could not load optimized top.sv file';
+            }
+            
+            let html = '<div class="code-comparison-container">';
+            
+            // Original code panel
+            html += '<div class="code-panel">';
+            html += '<div class="code-panel-header original">❌ Original Code (With Timing Violations)</div>';
+            html += '<div class="code-panel-content">';
+            
+            const originalLines = originalCode.split('\n');
+            originalLines.forEach((line, index) => {
+                const lineNum = (index + 1).toString().padStart(3, ' ');
+                let cssClass = '';
+                
+                // Highlight lines that have timing issues in the original code
+                if (line.includes('mul1 = a * b') || line.includes('mul2 = c * d')) {
+                    cssClass = 'highlight-removed'; // Direct combinatorial multiplications
+                } else if (line.includes('sum  = mul1 + mul2 + e')) {
+                    cssClass = 'highlight-removed'; // Long combinatorial path
+                } else if (line.includes('y <= sum')) {
+                    cssClass = 'highlight-removed'; // Direct assignment without pipelining
+                }
+                
+                html += `<div class="code-line ${cssClass}"><span class="code-line-number">${lineNum}</span>${escapeHtml(line)}</div>`;
+            });
+            
+            html += '</div></div>';
+            
+            // Optimized code panel
+            html += '<div class="code-panel">';
+            html += '<div class="code-panel-header optimized">✅ Optimized Code (Timing Fixed)</div>';
+            html += '<div class="code-panel-content">';
+            
+            if (optimizedCode) {
+                const optimizedLines = optimizedCode.split('\n');
+                optimizedLines.forEach((line, index) => {
+                    const lineNum = (index + 1).toString().padStart(3, ' ');
+                    let cssClass = '';
+                    
+                    // Highlight new/improved lines (more generic patterns for pipeline registers)
+                    if (line.includes('_reg') || line.includes('_comb')) {
+                        cssClass = 'highlight-added'; // Pipeline registers and separated combinatorial logic
+                    } else if (line.includes('always_ff') && line.includes('<=')) {
+                        cssClass = 'highlight-added'; // New flip-flop blocks for pipelining
+                    } else if (line.includes('IOB') || line.includes('TRUE')) {
+                        cssClass = 'highlight-added'; // Placement constraints
+                    }
+                    
+                    // Add animation delay based on line index and special class for animation
+                    html += `<div class="code-line ${cssClass} optimized-line-animate" data-line="${index}" style="animation-delay: ${index * 50}ms;"><span class="code-line-number">${lineNum}</span>${escapeHtml(line)}</div>`;
+                });
+            } else {
+                html += '<div class="code-line">No optimized code available</div>';
+            }
+            
+            html += '</div></div>';
+            html += '</div>';
+            
+            return html;
+        }
+        
+        function createDiffView(diffText) {
+            if (!diffText) return '';
+            
+            const lines = diffText.split('\n');
+            let html = '<div class="code-diff">';
+            
+            html += '<div style="background: var(--tertiary-bg); padding: 8px 15px; font-weight: 600;">📝 File Differences (+ Added, - Removed)</div>';
+            
+            lines.forEach(line => {
+                if (line.startsWith('---') || line.startsWith('+++') || line.startsWith('@@')) {
+                    return;
+                }
+                
+                let cssClass = 'diff-line-unchanged';
+                let prefix = '';
+                let displayLine = line;
+                
+                if (line.startsWith('+')) {
+                    cssClass = 'diff-line-added';
+                    prefix = '+ ';
+                    displayLine = line.substring(1);
+                } else if (line.startsWith('-')) {
+                    cssClass = 'diff-line-removed'; 
+                    prefix = '- ';
+                    displayLine = line.substring(1);
+                } else if (line.startsWith(' ')) {
+                    cssClass = 'diff-line-unchanged';
+                    prefix = '  ';
+                    displayLine = line.substring(1);
+                }
+                
+                html += `<div class="${cssClass}">${prefix}${escapeHtml(displayLine)}</div>`;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function downloadJSON() {
+            const link = document.createElement('a');
+            link.href = '/api/download/json';
+            link.download = 'timing_analysis.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            addMessage('JSON file download started. The timing analysis data has been downloaded.', 'ai');
+        }
+        
+        function downloadVerilog() {
+            const link = document.createElement('a');
+            link.href = '/api/download/verilog';
+            link.download = 'optimized_timing_top.sv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            addMessage('Verilog file download started. The optimized timing code has been downloaded as top.sv', 'ai');
+        }
+        
+        function triggerOptimizedCodeAnimation() {
+            const animatedLines = document.querySelectorAll('.optimized-line-animate');
+            console.log(`Starting line-by-line animation for ${animatedLines.length} lines`);
+            
+            // First, animate the optimized code header
+            const optimizedHeader = document.querySelector('.code-panel-header.optimized');
+            if (optimizedHeader) {
+                optimizedHeader.style.opacity = '0.5';
+                optimizedHeader.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    optimizedHeader.style.transition = 'all 0.6s ease-out';
+                    optimizedHeader.style.opacity = '1';
+                    optimizedHeader.style.transform = 'translateY(0)';
+                }, 100);
+            }
+            
+            // Reset all lines to initial state
+            animatedLines.forEach((line, index) => {
+                line.style.opacity = '0';
+                line.style.transform = 'translateX(20px)';
+            });
+            
+            // Start line animation after header animation
+            setTimeout(() => {
+                // Animate each line with progressive delay
+                animatedLines.forEach((line, index) => {
+                    setTimeout(() => {
+                        line.style.animation = 'none'; // Reset animation
+                        line.offsetHeight; // Trigger reflow
+                        
+                        // Apply appropriate animation class
+                        if (line.classList.contains('highlight-added')) {
+                            line.style.animation = 'slideInLineHighlighted 0.8s ease-out forwards';
+                        } else {
+                            line.style.animation = 'slideInLine 0.6s ease-out forwards';
+                        }
+                        
+                        // Add a subtle pulse effect for highlighted lines
+                        if (line.classList.contains('highlight-added')) {
+                            setTimeout(() => {
+                                line.style.boxShadow = '0 0 10px rgba(40, 167, 69, 0.3)';
+                                setTimeout(() => {
+                                    line.style.boxShadow = 'none';
+                                }, 400);
+                            }, 600);
+                        }
+                    }, index * 75); // 75ms delay between each line (slightly slower for better visibility)
+                });
+            }, 500); // Wait for header animation
+            
+            // Add a subtle scroll effect to keep the animated area in view
+            if (animatedLines.length > 0) {
+                setTimeout(() => {
+                    const firstAnimatedLine = animatedLines[0];
+                    firstAnimatedLine.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }, 700);
+            }
+        }
+    </script>
+</body>
+</html>

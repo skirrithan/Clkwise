@@ -15,8 +15,9 @@
 hw/*.txt
 *.cpy
 
-
 # Ignore build directories
+hw/.Xil/
+hw/vivado*
 backend/hw/.Xil/
 backend/hw/vivado*
 data/
@@ -32,5 +33,22 @@ data/
 Thumbs.db
 desktop.ini
 
-#ignore pycache
+# Python cache files
+__pycache__/
+*.py[cod]
+*.class
 backend/app/ingest/__pycache__
+
+# Flask session files
+flask_session/
+
+# Temporary upload files
+temp_uploads/
+
+# Environment files
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/

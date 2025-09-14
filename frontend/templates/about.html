@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLKWISE - ABOUT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        :root {
+            --primary-bg: #000000;
+            --secondary-bg: #111111;
+            --tertiary-bg: #333333;
+            --text-primary: #ffffff;
+            --text-secondary: #737373;
+            --accent-yellow: #FFD700;
+            --accent-blue: #0057B8;
+            --accent-green: #999999;
+            --accent-red: #DC3545;
+            --border-color: #333333;
+            --hover-bg: rgba(255, 255, 255, 0.07);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            outline: none !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        ::selection {
+            background-color: var(--accent-yellow);
+            color: #000;
+        }
+        
+        ::-moz-selection {
+            background-color: var(--accent-yellow);
+            color: #000;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--primary-bg);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-size: 20px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 1279.98px) {
+            body {
+                font-size: 14px;
+            }
+        }
+        
+        .page-wrapper {
+            min-height: 100vh;
+            background: var(--primary-bg);
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .top-bar {
+            background: var(--secondary-bg);
+            color: var(--text-primary);
+            font-size: 14px;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .top-bar-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .top-bar-content {
+                padding: 0 15px;
+            }
+        }
+        
+        .gov-notice {
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            position: relative;
+            padding-left: 0;
+        }
+        
+        .language-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .lang-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 400;
+            transition: color 0.5s ease;
+        }
+        
+        .lang-link.active,
+        .lang-link:hover {
+            color: var(--text-primary);
+        }
+        
+        .lang-divider {
+            color: var(--text-secondary);
+        }
+        
+        .main-nav {
+            background: var(--primary-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        @media (max-width: 639.98px) {
+            .main-nav {
+                padding: 15px 0;
+            }
+        }
+        
+        .nav-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .nav-content {
+                padding: 0 15px;
+            }
+        }
+        
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+        
+        @media (max-width: 639.98px) {
+            .logo {
+                font-size: 24px;
+            }
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 35px;
+            align-items: center;
+        }
+        
+        @media (max-width: 991.98px) {
+            .nav-links {
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 639.98px) {
+            .nav-links {
+                display: none;
+            }
+        }
+        
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            transition: color 0.5s ease;
+            white-space: nowrap;
+        }
+        
+        .nav-link:hover,
+        .nav-link:focus-visible,
+        .nav-link.active {
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        @media (max-width: 1279.98px) {
+            .nav-link {
+                font-size: 14px;
+            }
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 0 25px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .container {
+                padding: 0 15px;
+            }
+        }
+        
+        .hero-section {
+            background: var(--primary-bg);
+            padding: 80px 0 60px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        @media (max-width: 639.98px) {
+            .hero-section {
+                padding: 40px 0 30px;
+            }
+        }
+        
+        .hero-title {
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            letter-spacing: -0.02em;
+            line-height: 1.12;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        @media (max-width: 639.98px) {
+            .hero-title {
+                font-size: 32px;
+                margin-bottom: 20px;
+            }
+        }
+        
+        .hero-subtitle {
+            font-size: 18px;
+            color: var(--text-primary);
+            max-width: 800px;
+            margin: 0 auto 36px;
+            font-weight: 400;
+            line-height: 1.4;
+        }
+        
+        @media (max-width: 639.98px) {
+            .hero-subtitle {
+                font-size: 16px;
+                margin-bottom: 25px;
+            }
+        }
+        
+        .content-section {
+            padding: 80px 0;
+        }
+        
+        @media (max-width: 639.98px) {
+            .content-section {
+                padding: 40px 0;
+            }
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 80px;
+        }
+        
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+                margin-bottom: 60px;
+            }
+        }
+        
+        .content-card {
+            background: var(--secondary-bg);
+            padding: 40px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+        
+        .content-card:hover {
+            background: var(--hover-bg);
+            border-color: var(--text-primary);
+        }
+        
+        @media (max-width: 639.98px) {
+            .content-card {
+                padding: 30px 25px;
+            }
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        @media (max-width: 639.98px) {
+            .card-title {
+                font-size: 24px;
+                margin-bottom: 16px;
+            }
+        }
+        
+        .card-text {
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .card-text {
+                font-size: 14px;
+            }
+        }
+        
+        .features-section {
+            background: var(--secondary-bg);
+            padding: 80px 0;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        @media (max-width: 639.98px) {
+            .features-section {
+                padding: 40px 0;
+            }
+        }
+        
+        .section-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-align: center;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        @media (max-width: 639.98px) {
+            .section-title {
+                font-size: 24px;
+                margin-bottom: 40px;
+            }
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+        }
+        
+        .feature-card {
+            background: var(--primary-bg);
+            padding: 40px 30px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .feature-card:hover {
+            background: var(--hover-bg);
+            border-color: var(--accent-yellow);
+        }
+        
+        @media (max-width: 639.98px) {
+            .feature-card {
+                padding: 30px 25px;
+            }
+        }
+        
+        .feature-icon {
+            font-size: 48px;
+            color: var(--accent-yellow);
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        .feature-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .feature-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .cta-section {
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .cta-section {
+                padding: 40px 0;
+            }
+        }
+        
+        .cta-button {
+            background: var(--accent-yellow);
+            color: var(--primary-bg);
+            border: 2px solid transparent;
+            padding: 21px 50px;
+            border-radius: 0;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .cta-button:hover {
+            background: var(--accent-green);
+            color: var(--primary-bg);
+            text-decoration: none;
+        }
+        
+        @media (max-width: 639.98px) {
+            .cta-button {
+                padding: 18px 40px;
+                font-size: 16px;
+            }
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--secondary-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 40px 0;
+            margin-top: 80px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .footer {
+                padding: 25px 0;
+                margin-top: 40px;
+            }
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        @media (max-width: 639.98px) {
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        .footer-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+        
+        @media (max-width: 639.98px) {
+            .footer-links {
+                gap: 15px;
+            }
+        }
+        
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            transition: color 0.5s ease;
+        }
+        
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+        
+        .footer-link.active {
+            color: var(--accent-yellow);
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="top-bar">
+            <div class="top-bar-content">
+                <div class="gov-notice">OFFICIAL FPGA TIMING ANALYSIS PLATFORM</div>
+                <div class="language-selector">
+                    <a href="#" class="lang-link active">EN</a>
+                    <span class="lang-divider"> · </span>
+                    <a href="#" class="lang-link">FR</a>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="main-nav">
+            <div class="nav-content">
+                <a href="/" class="logo">CLKWISE</a>
+                <div class="nav-links">
+                    <a href="/" class="nav-link">Home</a>
+                    <a href="#" class="nav-link">Projects</a>
+                    <a href="#" class="nav-link">Reports</a>
+                    <a href="/about" class="nav-link active">About</a>
+                </div>
+            </div>
+        </nav>
+        
+        <div class="hero-section">
+            <div class="container">
+                <h1 class="hero-title">ABOUT CLKWISE</h1>
+                <p class="hero-subtitle">Premier AI-powered FPGA timing analysis platform, engineered to revolutionize digital design optimization and timing closure.</p>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <div class="container">
+                <div class="content-grid">
+                    <div class="content-card">
+                        <h2 class="card-title">OUR MISSION</h2>
+                        <p class="card-text">
+                            CLKWISE is dedicated to empowering FPGA engineers and digital designers with cutting-edge artificial intelligence tools for timing analysis and optimization.
+                        </p>
+                        <p class="card-text">
+                            We believe that every digital circuit deserves perfect timing closure, and our platform makes achieving this goal faster, smarter, and more accessible than ever before.
+                        </p>
+                    </div>
+                    
+                    <div class="content-card">
+                        <h2 class="card-title">ADVANCED TECHNOLOGY</h2>
+                        <p class="card-text">
+                            Built on state-of-the-art machine learning algorithms, CLKWISE analyzes your HDL designs and timing reports with unprecedented accuracy and intelligence.
+                        </p>
+                        <p class="card-text">
+                            Our AI models are trained on thousands of successful FPGA implementations, providing you with expert-level optimization recommendations and violation fixes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features-section">
+            <div class="container">
+                <h2 class="section-title">PLATFORM CAPABILITIES</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">AI</div>
+                        <h3 class="feature-title">INTELLIGENT ANALYSIS</h3>
+                        <p class="feature-text">ADVANCED AI ALGORITHMS ANALYZE YOUR TIMING REPORTS AND PROVIDE TARGETED OPTIMIZATION STRATEGIES</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">TC</div>
+                        <h3 class="feature-title">TIMING CLOSURE</h3>
+                        <p class="feature-text">EXPERT RECOMMENDATIONS FOR ACHIEVING PERFECT TIMING CLOSURE IN YOUR FPGA DESIGNS</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">HD</div>
+                        <h3 class="feature-title">HDL OPTIMIZATION</h3>
+                        <p class="feature-text">COMPREHENSIVE SUPPORT FOR VERILOG, SYSTEMVERILOG, AND VHDL DESIGN OPTIMIZATION</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">VR</div>
+                        <h3 class="feature-title">VIOLATION REPAIR</h3>
+                        <p class="feature-text">AUTOMATED DETECTION AND INTELLIGENT SUGGESTIONS FOR FIXING TIMING VIOLATIONS</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">RT</div>
+                        <h3 class="feature-title">REAL-TIME CHAT</h3>
+                        <p class="feature-text">INTERACTIVE AI ASSISTANT FOR IMMEDIATE GUIDANCE ON TIMING ISSUES AND DESIGN QUESTIONS</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">PR</div>
+                        <h3 class="feature-title">PROFESSIONAL GRADE</h3>
+                        <p class="feature-text">ENTERPRISE-LEVEL SECURITY AND RELIABILITY FOR MISSION-CRITICAL FPGA PROJECTS</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta-section">
+            <div class="container">
+                <h2 class="section-title">READY TO OPTIMIZE?</h2>
+                <p class="hero-subtitle">Experience the power of AI-driven FPGA timing analysis and achieve perfect timing closure for your digital designs.</p>
+                <a href="/" class="cta-button">START ANALYSIS NOW</a>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-text">CLKWISE AI FPGA TIMING ANALYSIS PLATFORM</div>
+                    <div class="footer-links">
+                        <a href="/" class="footer-link">Home</a>
+                        <a href="/about" class="footer-link active">About</a>
+                        <a href="#" class="footer-link">Documentation</a>
+                        <a href="#" class="footer-link">Support</a>
+                        <a href="#" class="footer-link">Contact</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
