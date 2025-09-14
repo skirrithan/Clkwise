@@ -1499,6 +1499,46 @@ font-size: 10px;
             background: rgba(220, 53, 69, 0.2);
             color: #ffb3b3;
         }
+        
+        /* Optimized code line-by-line animation */
+        .optimized-line-animate {
+            opacity: 0;
+            transform: translateX(20px);
+            /* Don't auto-animate, wait for JavaScript trigger */
+        }
+        
+        @keyframes slideInLine {
+            0% {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Enhanced highlight for animated lines */
+        .optimized-line-animate.highlight-added {
+            animation: slideInLineHighlighted 0.8s ease-out forwards;
+        }
+        
+        @keyframes slideInLineHighlighted {
+            0% {
+                opacity: 0;
+                transform: translateX(20px);
+                background: rgba(40, 167, 69, 0.4);
+            }
+            50% {
+                opacity: 0.7;
+                background: rgba(40, 167, 69, 0.3);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+                background: rgba(40, 167, 69, 0.2);
+            }
+        }
     </style>
 </head>
 <body>
@@ -2093,9 +2133,12 @@ font-size: 10px;
                 });
             }
 
-            if (codeChanges.diff) {
+            if (codeChanges.diff || artifacts?.top_sv?.content) {
                 html += '<h4>Code Changes (Side-by-Side Comparison):</h4>';
-                html += createSideBySideView(codeChanges.diff, artifacts);
+                html += `<div id="sideByLoadingPlaceholder" style="padding: 40px; text-align: center; color: var(--text-secondary);">
+                    <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border-color); border-top: 2px solid var(--accent-yellow); border-radius: 50%; animation: spin 1s linear infinite; margin-right: 10px;"></div>
+                    Loading optimized code with line-by-line animation...
+                </div>`;
             }
 
             if (codeChanges.changes_summary) {
@@ -2112,27 +2155,62 @@ font-size: 10px;
             }
 
             container.innerHTML = html || '<p>No code changes available.</p>';
+            
+            // If we have code comparison to show, load it asynchronously
+            if (codeChanges.diff || artifacts?.top_sv?.content) {
+                createSideBySideView(codeChanges.diff, artifacts).then(comparisonHtml => {
+                    const placeholder = document.getElementById('sideByLoadingPlaceholder');
+                    if (placeholder) {
+                        placeholder.innerHTML = comparisonHtml;
+                        // Trigger the line-by-line animation for optimized code
+                        setTimeout(() => {
+                            triggerOptimizedCodeAnimation();
+                        }, 500); // Small delay to let the DOM update
+                    }
+                }).catch(error => {
+                    console.error('Error creating side-by-side view:', error);
+                    const placeholder = document.getElementById('sideByLoadingPlaceholder');
+                    if (placeholder) {
+                        placeholder.innerHTML = '<p>Error loading code comparison.</p>';
+                    }
+                });
+            }
         }
         
-        function createSideBySideView(diffText, artifacts) {
-            const originalCode = `module top(
-  input  logic         clk,
-  input  logic         rst_n,
-  input  logic [31:0]  a, b, c, d, e, //32 bit
-  output logic [63:0]  y //64 bit
-);
-
-  logic [63:0] mul1 = a * b; //32 bit x 32 bit
-  logic [63:0] mul2 = c * d; //32 bit x 32 bit
-  logic [63:0] sum  = mul1 + mul2 + e;  //64 bit + 64 bit + 32 bit
-
-  always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n) y <= '0;
-    else        y <= sum;
-  end
-endmodule`;
+        async function createSideBySideView(diffText, artifacts) {
+            // Fetch original top.sv content (problematic version) from the API
+            let originalCode = '';
+            try {
+                const response = await fetch('/api/original/top.sv');
+                const data = await response.json();
+                if (data.status === 'success') {
+                    originalCode = data.content;
+                } else {
+                    console.error('Failed to fetch original top.sv:', data.error);
+                    originalCode = '// Error: Could not load original top.sv file';
+                }
+            } catch (error) {
+                console.error('Error fetching original top.sv:', error);
+                originalCode = '// Error: Could not load original top.sv file';
+            }
             
-            const optimizedCode = artifacts?.top_sv?.content || '';
+            // Fetch optimized top.sv content (timing-fixed version) from the API
+            let optimizedCode = '';
+            try {
+                const response = await fetch('/api/optimized/top.sv');
+                const data = await response.json();
+                if (data.status === 'success') {
+                    optimizedCode = data.content;
+                } else {
+                    console.error('Failed to fetch optimized top.sv:', data.error);
+                    // Fallback to artifacts if API fails
+                    optimizedCode = artifacts?.top_sv?.content || '// Error: Could not load optimized top.sv file';
+                }
+            } catch (error) {
+                console.error('Error fetching optimized top.sv:', error);
+                // Fallback to artifacts if API fails
+                optimizedCode = artifacts?.top_sv?.content || '// Error: Could not load optimized top.sv file';
+            }
             
             let html = '<div class="code-comparison-container">';
             
@@ -2143,12 +2221,16 @@ endmodule`;
             
             const originalLines = originalCode.split('\n');
             originalLines.forEach((line, index) => {
-                const lineNum = (index + 1).toString().padStart(2, ' ');
+                const lineNum = (index + 1).toString().padStart(3, ' ');
                 let cssClass = '';
                 
-                // Highlight problematic lines
-                if (line.includes('y <= sum')) {
-                    cssClass = 'highlight-removed';
+                // Highlight lines that have timing issues in the original code
+                if (line.includes('mul1 = a * b') || line.includes('mul2 = c * d')) {
+                    cssClass = 'highlight-removed'; // Direct combinatorial multiplications
+                } else if (line.includes('sum  = mul1 + mul2 + e')) {
+                    cssClass = 'highlight-removed'; // Long combinatorial path
+                } else if (line.includes('y <= sum')) {
+                    cssClass = 'highlight-removed'; // Direct assignment without pipelining
                 }
                 
                 html += `<div class="code-line ${cssClass}"><span class="code-line-number">${lineNum}</span>${escapeHtml(line)}</div>`;
@@ -2164,15 +2246,20 @@ endmodule`;
             if (optimizedCode) {
                 const optimizedLines = optimizedCode.split('\n');
                 optimizedLines.forEach((line, index) => {
-                    const lineNum = (index + 1).toString().padStart(2, ' ');
+                    const lineNum = (index + 1).toString().padStart(3, ' ');
                     let cssClass = '';
                     
-                    // Highlight new/changed lines
-                    if (line.includes('y_pipe1') || line.includes('y <= y_pipe1')) {
-                        cssClass = 'highlight-added';
+                    // Highlight new/improved lines (more generic patterns for pipeline registers)
+                    if (line.includes('_reg') || line.includes('_comb')) {
+                        cssClass = 'highlight-added'; // Pipeline registers and separated combinatorial logic
+                    } else if (line.includes('always_ff') && line.includes('<=')) {
+                        cssClass = 'highlight-added'; // New flip-flop blocks for pipelining
+                    } else if (line.includes('IOB') || line.includes('TRUE')) {
+                        cssClass = 'highlight-added'; // Placement constraints
                     }
                     
-                    html += `<div class="code-line ${cssClass}"><span class="code-line-number">${lineNum}</span>${escapeHtml(line)}</div>`;
+                    // Add animation delay based on line index and special class for animation
+                    html += `<div class="code-line ${cssClass} optimized-line-animate" data-line="${index}" style="animation-delay: ${index * 50}ms;"><span class="code-line-number">${lineNum}</span>${escapeHtml(line)}</div>`;
                 });
             } else {
                 html += '<div class="code-line">No optimized code available</div>';
@@ -2248,6 +2335,68 @@ endmodule`;
             document.body.removeChild(link);
             
             addMessage('Verilog file download started. The optimized timing code has been downloaded as top.sv', 'ai');
+        }
+        
+        function triggerOptimizedCodeAnimation() {
+            const animatedLines = document.querySelectorAll('.optimized-line-animate');
+            console.log(`Starting line-by-line animation for ${animatedLines.length} lines`);
+            
+            // First, animate the optimized code header
+            const optimizedHeader = document.querySelector('.code-panel-header.optimized');
+            if (optimizedHeader) {
+                optimizedHeader.style.opacity = '0.5';
+                optimizedHeader.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    optimizedHeader.style.transition = 'all 0.6s ease-out';
+                    optimizedHeader.style.opacity = '1';
+                    optimizedHeader.style.transform = 'translateY(0)';
+                }, 100);
+            }
+            
+            // Reset all lines to initial state
+            animatedLines.forEach((line, index) => {
+                line.style.opacity = '0';
+                line.style.transform = 'translateX(20px)';
+            });
+            
+            // Start line animation after header animation
+            setTimeout(() => {
+                // Animate each line with progressive delay
+                animatedLines.forEach((line, index) => {
+                    setTimeout(() => {
+                        line.style.animation = 'none'; // Reset animation
+                        line.offsetHeight; // Trigger reflow
+                        
+                        // Apply appropriate animation class
+                        if (line.classList.contains('highlight-added')) {
+                            line.style.animation = 'slideInLineHighlighted 0.8s ease-out forwards';
+                        } else {
+                            line.style.animation = 'slideInLine 0.6s ease-out forwards';
+                        }
+                        
+                        // Add a subtle pulse effect for highlighted lines
+                        if (line.classList.contains('highlight-added')) {
+                            setTimeout(() => {
+                                line.style.boxShadow = '0 0 10px rgba(40, 167, 69, 0.3)';
+                                setTimeout(() => {
+                                    line.style.boxShadow = 'none';
+                                }, 400);
+                            }, 600);
+                        }
+                    }, index * 75); // 75ms delay between each line (slightly slower for better visibility)
+                });
+            }, 500); // Wait for header animation
+            
+            // Add a subtle scroll effect to keep the animated area in view
+            if (animatedLines.length > 0) {
+                setTimeout(() => {
+                    const firstAnimatedLine = animatedLines[0];
+                    firstAnimatedLine.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }, 700);
+            }
         }
     </script>
 </body>

@@ -201,23 +201,23 @@ def download_json():
 @app.route('/api/download/verilog', methods=['GET'])
 def download_verilog():
     """
-    Download the generated Verilog code from the artifacts.
+    Download the optimized Verilog code (current top.sv file).
     
     Returns:
         Verilog file as download
     """
     try:
-        analysis_data = load_current_analysis_data()
+        # Get the optimized Verilog code from the current top.sv file
+        top_sv_path = Path(__file__).parent.parent.parent / 'top.sv'
         
-        # Get the Verilog code from artifacts
-        artifacts = analysis_data.get('original', {}).get('result', {}).get('artifacts', {})
-        verilog_content = artifacts.get('top_sv', {}).get('content', '')
-        
-        if not verilog_content:
+        if not top_sv_path.exists():
             return jsonify({
-                'error': 'No Verilog code available for download',
+                'error': 'Optimized top.sv file not found',
                 'status': 'not_found'
             }), 404
+        
+        with open(top_sv_path, 'r', encoding='utf-8') as f:
+            verilog_content = f.read()
         
         from flask import make_response
         
@@ -226,14 +226,81 @@ def download_verilog():
         response.headers['Content-Disposition'] = 'attachment; filename=optimized_timing_top.sv'
         
         return response
-    except FileNotFoundError:
-        return jsonify({
-            'error': 'No analysis data available for download',
-            'status': 'not_found'
-        }), 404
     except Exception as e:
         return jsonify({
-            'error': str(e),
+            'error': f'Failed to read optimized top.sv: {str(e)}',
+            'status': 'error'
+        }), 500
+
+@app.route('/api/original/top.sv', methods=['GET'])
+def get_original_top_sv():
+    """
+    Get the original problematic top.sv file content for diff comparison.
+    This returns the simple version with timing violations, not the optimized version.
+    
+    Returns:
+        JSON with the original problematic top.sv file content
+    """
+    try:
+        # The original problematic code (before timing fixes)
+        original_problematic_code = """module top(
+  input  logic         clk,
+  input  logic         rst_n,
+  input  logic [31:0]  a, b, c, d, e, //32 bit
+  output logic [63:0]  y //64 bit
+);
+
+  logic [63:0] mul1 = a * b; //32 bit x 32 bit
+  logic [63:0] mul2 = c * d; //32 bit x 32 bit
+  logic [63:0] sum  = mul1 + mul2 + e;  //64 bit + 64 bit + 32 bit
+
+  always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) y <= '0;
+    else        y <= sum;
+  end
+endmodule"""
+        
+        return jsonify({
+            'status': 'success',
+            'content': original_problematic_code,
+            'filename': 'top.sv (original with timing violations)'
+        })
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to generate original top.sv: {str(e)}',
+            'status': 'error'
+        }), 500
+
+@app.route('/api/optimized/top.sv', methods=['GET'])
+def get_optimized_top_sv():
+    """
+    Get the optimized top.sv file content (the current top.sv file in the project).
+    This contains the timing-fixed version with pipeline registers.
+    
+    Returns:
+        JSON with the optimized top.sv file content
+    """
+    try:
+        # Path to the current optimized top.sv file in the project root
+        top_sv_path = Path(__file__).parent.parent.parent / 'top.sv'
+        
+        if not top_sv_path.exists():
+            return jsonify({
+                'error': 'Optimized top.sv file not found',
+                'status': 'not_found'
+            }), 404
+        
+        with open(top_sv_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        return jsonify({
+            'status': 'success',
+            'content': content,
+            'filename': 'top.sv (optimized timing-fixed)'
+        })
+    except Exception as e:
+        return jsonify({
+            'error': f'Failed to read optimized top.sv: {str(e)}',
             'status': 'error'
         }), 500
 
