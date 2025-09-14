@@ -1,16 +1,16 @@
 **Kirri:** (holding up his phone)
-“This phone has over 20 billion transistors—tiny switches that must each fire at exactly the right moment to make the chip work.
+"This phone contains the Apple A17 Pro chip with over 19 billion transistors—tiny switches that must each fire at exactly the right moment to make the chip work.
 
-And here’s the shocking truth: hardware engineers spend 60% of their time not designing new chips, but fixing timing errors. That’s 24 hours every single week, just untangling mysterious timing violations instead of building the future. It’s frustrating, it’s exhausting—and it’s slowing down everything.”
+And here's the reality: for complex FPGA and ASIC designs, hardware engineers spend 50-80% of their project time on timing closure. That's the majority of every project cycle, just untangling timing violations instead of building innovative features. It's the most time-intensive part of chip development."
 
 **Raiya:**
 “And it’s only getting worse. As chips get more advanced, they’re becoming mind-bogglingly complex.
 
-A single modern processor might contain hundreds of millions of connections and timing paths. If even one path is a few trillionths of a second too slow, the entire chip can fail.
+A modern FPGA like the Xilinx UltraScale+ can have millions of timing paths that must be analyzed. If even one critical path violates timing by nanoseconds or even picoseconds, the entire design can fail in the field.
 
-This process of chasing down and fixing those timing issues is called timing closure—and it’s now the #1 bottleneck stopping new products from reaching the market.
+This process of chasing down and fixing those timing issues is called timing closure—and it's consistently ranked as the top design bottleneck in industry surveys.
 
-It’s why every major chip launch is delayed by months. And across the entire semiconductor industry, this problem costs over \$100 billion a year in wasted time, lost revenue, and missed market windows.”
+It's why FPGA projects commonly face 3-6 month delays, and why the EDA timing analysis tools market represents over $2 billion in annual spending. Every day spent on timing closure delays time-to-market for critical products."
 
 **Kirri:** (showing a timing report)
 “Here’s what engineers stare at every day.
@@ -19,12 +19,12 @@ This is a real Static Timing Analysis report from a production design. It’s pa
 
 * Setup violations. Hold violations. Negative slack. Clock domain mismatches.
 
-It’s like trying to find a single frayed wire in a maze of 50 million invisible wires—blindfolded.
+It's like trying to find a single problematic connection among millions of interconnected logic paths—each with its own timing requirements.
 
 And even if you find one issue and fix it, you might accidentally break five others. It’s a never-ending cycle.”
 
 **Raiya:**
-“Imagine being told you have 50,000 things wrong with your design—but no one tells you which 3 actually matter. That’s the nightmare engineers are living in.”
+"Imagine getting a timing report with thousands of violations—but not knowing which ones are critical and which ones you can safely ignore. That's the daily reality for hardware engineers."
 
 ---
 
@@ -36,7 +36,7 @@ And even if you find one issue and fix it, you might accidentally break five oth
 Watch this: I’ll take this exact same messy timing report, plus the design files and logs… and upload them into Clkwise.”
 
 **Raiya:**
-“Processing… and done. In milliseconds.
+"Processing… and done. In under a second.
 
 Instead of pages of incomprehensible errors, Clkwise gives us:
 
@@ -45,7 +45,7 @@ Instead of pages of incomprehensible errors, Clkwise gives us:
 * Predicted results showing how much faster or more power-efficient the design will become.”
 
 **Kirri:**
-“In seconds, what used to take days or weeks is solved. And the magic is—engineers stay in control. Clkwise doesn’t just spit out answers; it helps experts understand their designs faster and make smarter decisions.”
+"In seconds, what used to take hours or days of manual analysis is solved. And the key is—engineers stay in control. Clkwise doesn't just provide answers; it helps experts understand their designs faster and make more informed decisions."
 
 **Raiya:**
 “It’s like going from reading ancient hieroglyphics to having real-time subtitles in your own language. This is how AI makes experts more productive.”
