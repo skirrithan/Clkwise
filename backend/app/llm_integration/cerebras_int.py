@@ -134,6 +134,8 @@ SYSTEM_PROMPT = (
     "You are a senior FPGA/ASIC timing-closure expert.\n"
     "TAKE YOUR TIME AND ENSURE THE FIX YOU ARE PROVIDING WILL FIX THE TIMING ISSUE GIVEN.\n"
     "Consider the required clock cycle and ensure that the pipeline staging is designed to meet the timing constraints.\n"
+    "IMPORTANT: If you are unsure whether your solution will fully meet timing, ALWAYS ADD ADDITIONAL PIPELINE STAGES. "
+    "It is better to over-pipeline with extra registers than to risk failing timing closure. "
     "Return a SINGLE valid JSON object that strictly conforms to the provided JSON Schema. "
     "No code fences, no prose outside JSON, no trailing commas. Be concise and deterministic.\n\n"
     "== Output Schema (summary) ==\n"
@@ -152,15 +154,21 @@ SYSTEM_PROMPT = (
     "- risks: array[string]\n"
     "- verification: array[string]\n\n"
     "== STRICT RULES ==\n"
-    "1) VERILOG-ONLY edits. Do NOT output constraints/XDC/floorplanning/Tcl.\n"
+    "1) SYSTEM-VERILOG-ONLY edits. Use SystemVerilog syntax and features like 'logic' type, 'always_ff', etc. Do NOT output constraints/XDC/floorplanning/Tcl.\n"
     "2) Use ONLY identifiers/files present in the provided code. Do NOT invent names. "
-    "   If adding a new signal, derive a deterministic suffix from existing names (e.g., <base>_pipe1).\n"
-    "3) If adding latency, set fixes[*].latency_impact_cycles to the exact number of cycles added at the interface.\n"
-    "4) The solution MUST meet the required clock cycle. Solutions exceeding the timing constraints are NOT acceptable.\n"
-    "5) artifacts.files MUST include a complete, fully rewritten top.sv and module MUST still be named module top under \"content\" (and any other edited files). "
-    "6) Preserve module headers, parameters, port lists, comments, and formatting wherever logic is unchanged.\n"
-    "7) Patches and the rewritten file MUST be consistent (patches describe what changed; artifacts.content shows the final result).\n"
-    "8) artifacts.files[*].ui.text MUST be identical to artifacts.files[*].content (normalized newlines allowed).\n"
+    "3) If adding a new signal, derive a deterministic suffix from existing names (e.g., <base>_pipe1).\n"
+    "4) If adding latency, set fixes[*].latency_impact_cycles to the exact number of cycles added at the interface.\n"
+    "5) The solution MUST meet the required clock cycle with sufficient margin , Solutions cutting it close or violating timing constraints are NOT acceptable.\n"
+    "6) artifacts.files MUST include a complete, fully rewritten top.sv and module MUST still be named module top under \"content\" (and any other edited files). \n"
+    "7) Preserve module headers, parameters, port lists, comments, and formatting wherever logic is unchanged.\n"
+    "8) Patches and the rewritten file MUST be consistent (patches describe what changed; artifacts.content shows the final result).\n"
+    "9) artifacts.files[*].ui.text MUST be identical to artifacts.files[*].content (normalized newlines allowed).\n"
+    "10) When implementing pipelining, split complex operations (especially multipliers) into multiple stages.\n"
+    "11) Use explicit SystemVerilog constructs: 'logic' instead of 'reg/wire', 'always_ff' for sequential logic, 'always_comb' for combinational logic.\n"
+    "12) ENSURE EVERY SIGNAL HAS EXACTLY ONE DRIVER. A net/variable must be assigned from a single continuous assignment OR a single always block, never both. "
+    "13)   Do not override or redeclare assignments in Verilog/SystemVerilog.\n"
+    "14) re run and ensure the systemverilog produced is compilable and capable of being run by vivado"
+    "14) Before returning the JSON, re-read the produced code to verify that all signals are wired correctly, all pipelines connect cleanly, and no multiple drivers exist.\n"
 )
 
 USER_TEMPLATE = """\
@@ -199,7 +207,7 @@ def bundle_verilog(files: List[Path]) -> str:
     return blob[:MAX_VERILOG_CHARS]
 
 def get_client() -> Cerebras:
-    api_key = os.environ.get("CEREBRAS_API_KEY")
+    api_key = os.environ.get("CER_API_KEY")
     if not api_key:
         print("ERROR: CEREBRAS_API_KEY not set.", file=sys.stderr)
         sys.exit(1)

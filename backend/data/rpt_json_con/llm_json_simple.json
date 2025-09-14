@@ -1,54 +1,53 @@
 {
-  "clock": "sys_clk@250.0MHz (4.0ns)",
+  "clock": "sys_clk@100.0MHz (10.0ns)",
   "overview": {
-    "wns_ns": -5.961,
-    "tns_ns": -616.532,
+    "wns_ns": -1.882,
+    "tns_ns": -63.121,
     "violations": 20
   },
-  "sdc_gaps": [],
+  "sdc_gaps": [
+    "Missing set_input_delay on at least one input; verify external timing model."
+  ],
   "issues": [
     {
-      "path_kind": "reg->out",
-      "signal_group": "y[*]",
-      "worst_bit": 62,
-      "worst_slack_ns": -5.961,
-      "dominant_delay": "OBUF + routing + skew",
-      "skew_character": "negative_source_skew_large",
+      "path_kind": "reg->reg",
+      "signal_group": "y_reg[*]",
+      "worst_bit": 55,
+      "worst_slack_ns": -1.882,
+      "dominant_delay": "logic",
+      "skew_character": "negative_destination_skew",
       "evidence": {
-        "data_path_ns": 4.785,
-        "logic_ns": 2.728,
-        "route_ns": 2.057,
-        "levels_of_logic": 1,
-        "clock_skew_ns": -4.641,
-        "output_delay_ns": 0.5,
-        "dcd_ns": 0.0,
-        "scd_ns": 4.641,
+        "data_path_ns": 14.535,
+        "logic_ns": 9.671,
+        "route_ns": 4.863,
+        "levels_of_logic": 21,
+        "clock_skew_ns": 3.624,
+        "output_delay_ns": null,
+        "dcd_ns": 3.624,
+        "scd_ns": 0.0,
         "cpr_ns": 0.0,
         "clock_uncertainty_ns": 0.035,
         "tsj_ns": 0.071,
         "tij_ns": 0.0,
         "dj_ns": 0.0,
         "pe_ns": 0.0,
-        "required_time_ns": 3.465,
-        "arrival_time_ns": -9.426,
-        "io_primitive": "OBUF",
-        "io_site": "G15",
-        "src_slice": "SLICE_X0Y167",
+        "required_time_ns": null,
+        "arrival_time_ns": null,
+        "io_primitive": null,
+        "io_site": null,
+        "src_slice": null,
         "clock_net_fanout_max": null,
         "clock_net_delay_ns_total": null
       },
-      "root_cause": "Unpipelined REG->OBUF path to top-level port with high OBUF + routing + skew and large negative source clock skew (source path > dest path).",
+      "root_cause": "Deep combinational logic on REG->REG path with high logic.",
       "where_in_code": {
-        "dest_port": "y[[1:0,44:42,50:47,63:53]",
+        "dest_port": "y_reg[[63:44]",
         "src_ff_regex": "y_reg\\[(\\d+)\\]"
       },
       "fix_hints": [
-        "Add output pipeline/reg in IOB (Vivado: set_property IOB TRUE [get_cells <y_reg[*]>]).",
-        "Use ODDR/OSERDES or dedicated IO primitives for high-speed buses.",
-        "Floorplan: LOC the output regs near the target IO bank; add Pblock over the bank; reduce long routes.",
-        "If external timing allows, relax set_output_delay -max/-min or the clock period.",
-        "Try OBUFDS (if differential) or faster IO standard/drive settings; evaluate SLEW=FAST where signal integrity permits.",
-        "Constrain placement to shorten critical nets; resolve congestion hot spots near the IO bank."
+        "Insert a pipeline stage (retime) to split combinational depth.",
+        "Duplicate high-fanout registers to reduce net delay; add MAX_FANOUT or phys_opt_design -dup_registers.",
+        "Constrain/floorplan critical cells closer together; pblock and keep hierarchy."
       ]
     }
   ]

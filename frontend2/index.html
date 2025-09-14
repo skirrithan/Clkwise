@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="hero">
-  <h1>CLKWISE AI</h1>
+  <h1 id="typing-header"></h1>
   <p>Upload a timing report (.rpt) and your Verilog (.sv). We’ll analyze and show fixes + a diff.</p>
 </section>
 
@@ -14,6 +14,6 @@
     <span>Verilog Source (.sv / .v)</span>
     <input type="file" name="sv" required />
   </label>
-  <button class="primary" type="submit">Run Pipeline</button>
+  <button class="primary" type="submit">Run Analysis</button>
 </form>
 {% endblock %}

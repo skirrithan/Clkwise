@@ -5,6 +5,24 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CLKWISE AI</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    #typing-header {
+      display: inline-block;
+      font-family: inherit;
+      font-size: 2em;
+      white-space: pre;
+    }
+    .typing-cursor {
+      display: inline-block;
+      width: 1ch;
+      animation: blink 1s steps(1) infinite;
+      color: #dcb020;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+  </style>
 </head>
 <body>
   <header class="nav">
@@ -25,5 +43,23 @@
     {% block content %}{% endblock %}
   </main>
   <footer class="footer">© CLKWISE AI</footer>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const text = "CLKWISE AI";
+      const header = document.getElementById("typing-header");
+      let i = 0;
+
+      function type() {
+        header.innerHTML = text.slice(0, i) + '<span class="typing-cursor">|</span>';
+        if (i < text.length) {
+          i++;
+          setTimeout(type, 120);
+        } else {
+          header.innerHTML = text + '<span class="typing-cursor">|</span>';
+        }
+      }
+      type();
+    });
+  </script>
 </body>
 </html>

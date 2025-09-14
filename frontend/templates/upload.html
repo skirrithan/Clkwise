@@ -669,7 +669,7 @@
         
         .primary-btn:disabled {
             background: var(--tertiary-bg);
-            color: var(--text-secondary);
+            color: var (--text-secondary);
             cursor: not-allowed;
             opacity: 0.3;
         }
@@ -687,7 +687,7 @@
             overflow-y: auto;
         }
         .file-item {
-            background: var(--tertiary-bg);
+            background: var (--tertiary-bg);
             padding: 16px;
             margin: 8px 0;
             border-radius: 0;
@@ -707,7 +707,7 @@
             text-align: center;
             margin-top: 56px;
             padding: 56px 40px;
-            background: var(--secondary-bg);
+            background: var (--secondary-bg);
             border: 1px solid var(--border-color);
             border-radius: 0;
         }
@@ -1284,7 +1284,7 @@
             padding: 25px;
             background: var(--tertiary-bg);
             border-radius: 8px;
-            border: 1px solid var(--border-color);
+            border: 1px solid var (--border-color);
         }
         
         .code-changes-content {
@@ -1555,7 +1555,7 @@ font-size: 10px;
             </div>
         </div>
     </div>
-    
+
     <div class="page-wrapper">
         <div class="top-bar">
             <div class="top-bar-content">
@@ -1625,10 +1625,10 @@ font-size: 10px;
                                         <h3>HDL Design Files</h3>
                                     </div>
                                     <p>VERILOG, SYSTEMVERILOG, VHDL CODE ANALYSIS. SUPPORTED: .V, .SV, .VHD, .VHDL</p>
-                                    <button type="button" class="upload-btn" onclick="document.getElementById('codeFiles').click()">
+                                    <button type="button" class="upload-btn" onclick="document.getElementById('hdlFile').click()">
                                         <span>Choose Files</span>
                                     </button>
-                                    <input type="file" id="codeFiles" name="code_files" class="file-input" multiple 
+                                    <input type="file" id="hdlFile" name="code_files" class="file-input" 
                                            accept=".v,.sv,.vhd,.vhdl,.vh,.svh">
                                     <div id="codeFileList" class="file-list"></div>
                                 </div>
@@ -1640,10 +1640,10 @@ font-size: 10px;
                                         <h3>Timing Reports & Analysis</h3>
                                     </div>
                                     <p>VIVADO REPORTS, SYNTHESIS LOGS, EDA ANALYSIS. SUPPORTED: .RPT, .LOG, .TXT</p>
-                                    <button type="button" class="upload-btn" onclick="document.getElementById('logFiles').click()">
+                                    <button type="button" class="upload-btn" onclick="document.getElementById('timingFile').click()">
                                         <span>Choose Files</span>
                                     </button>
-                                    <input type="file" id="logFiles" name="log_files" class="file-input" multiple 
+                                    <input type="file" id="timingFile" name="log_files" class="file-input" 
                                            accept=".rpt,.log,.txt,.out">
                                     <div id="logFileList" class="file-list"></div>
                                 </div>
@@ -1881,11 +1881,11 @@ font-size: 10px;
         let logFiles = [];
 
         // File upload handling
-        document.getElementById('codeFiles').addEventListener('change', function(e) {
+        document.getElementById('hdlFile').addEventListener('change', function(e) {
             handleFileSelection(e.target.files, 'code');
         });
 
-        document.getElementById('logFiles').addEventListener('change', function(e) {
+        document.getElementById('timingFile').addEventListener('change', function(e) {
             handleFileSelection(e.target.files, 'log');
         });
 
@@ -2034,19 +2034,7 @@ font-size: 10px;
         // Form submission with file handling
         document.getElementById('analysisForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            // Show analysis in progress
-            const analyzeBtn = document.getElementById('analyzeBtn');
-            const originalText = analyzeBtn.textContent;
-            analyzeBtn.textContent = 'ANALYZING...';
-            analyzeBtn.disabled = true;
-            
-            // Simulate dual AI analysis process
-            setTimeout(function() {
-                showCodeComparison();
-                analyzeBtn.textContent = originalText;
-                analyzeBtn.disabled = false;
-            }, 2000); // Simulate 2 second analysis time
+            uploadAndProcess();
         });
         
         function showCodeComparison() {
@@ -2398,6 +2386,70 @@ font-size: 10px;
                 }, 700);
             }
         }
+
+        // Add this function to your JavaScript in upload.html or update your existing one
+        function uploadAndProcess() {
+            const formData = new FormData();
+            const hdlFileInput = document.getElementById('hdlFile'); // Make sure this ID matches your input element
+            const timingFileInput = document.getElementById('timingFile'); // Make sure this ID matches your input element
+            
+            if (hdlFileInput.files.length === 0 || timingFileInput.files.length === 0) {
+                alert('Please select both HDL and timing files');
+                return;
+            }
+            
+            // Add files to the FormData object
+            formData.append('code_files', hdlFileInput.files[0]);
+            formData.append('log_files', timingFileInput.files[0]);
+            
+            // Show loading state
+            document.getElementById('analyzeBtn').textContent = 'PROCESSING...';
+            document.getElementById('analyzeBtn').disabled = true;
+            
+            // Step 1: Upload files
+            fetch('/api/upload/files', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log('Files uploaded successfully');
+                    
+                    // Step 2: Process files
+                    return fetch('/api/process/files', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                } else {
+                    throw new Error(data.error || 'Failed to upload files');
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log('Processing successful');
+                    // Redirect to results page
+                    window.location.href = data.redirect || '/results';
+                } else {
+                    throw new Error(data.error || 'Processing failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+                document.getElementById('analyzeBtn').textContent = 'ANALYZE';
+                document.getElementById('analyzeBtn').disabled = false;
+            });
+        }
+
+        // Make sure your form submission uses this function
+        document.getElementById('analysisForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            uploadAndProcess();
+        });
     </script>
 </body>
 </html>

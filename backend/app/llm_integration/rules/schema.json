@@ -1,112 +1,96 @@
-{
+TIMING_FIX_SCHEMA: Dict[str, Any] = {
     "type": "object",
-    "required": ["summary", "fixes", "artifacts", "risks", "verification"],
     "properties": {
-      "summary": {
-        "type": "object",
-        "required": ["clock_name", "period_ns", "wns_ns", "path_kind", "signal_group", "root_cause"],
-        "properties": {
-          "clock_name": { "type": "string" },
-          "period_ns": { "type": "number" },
-          "wns_ns": { "type": "number" },
-          "path_kind": { "type": "string" },
-          "signal_group": { "type": "string" },
-          "root_cause": { "type": "string" }
+        "summary": {
+            "type": "object",
+            "properties": {
+                "clock_name": {"type": "string"},
+                "period_ns": {"type": "number"},
+                "wns_ns": {"type": "number"},
+                "path_kind": {"type": "string"},
+                "signal_group": {"type": "string"},
+                "root_cause": {"type": "string"}
+            },
+            "required": ["clock_name", "period_ns", "wns_ns", "path_kind", "signal_group", "root_cause"],
+            "additionalProperties": False
         },
-        "additionalProperties": false
-      },
-      "fixes": {
-        "type": "array",
-        "minItems": 1,
-        "items": {
-          "type": "object",
-          "required": ["id", "title", "rationale", "where", "verilog_patch"],
-          "properties": {
-            "id": { "type": "string" },
-            "title": { "type": "string" },
-            "rationale": { "type": "string" },
-            "where": {
-              "type": "object",
-              "required": ["file", "anchor_regex", "ports_touched", "signals_new"],
-              "properties": {
-                "file": { "type": "string", "pattern": ".*\\.sv$" },
-                "anchor_regex": { "type": "string" },
-                "ports_touched": { "type": "array", "items": { "type": "string" } },
-                "signals_new": { "type": "array", "items": { "type": "string" } }
-              },
-              "additionalProperties": false
-            },
-            "verilog_patch": {
-              "type": "object",
-              "required": ["kind", "block"],
-              "properties": {
-                "kind": { "enum": ["insert_block", "replace_regex", "append_before_endmodule"] },
-                "after_regex": { "type": "string" },
-                "before_regex": { "type": "string" },
-                "block": { "type": "string" }
-              },
-              "additionalProperties": false
-            },
-            "verilog_patch_2": {
-              "type": "object",
-              "properties": {
-                "kind": { "enum": ["insert_block", "replace_regex", "append_before_endmodule"] },
-                "after_regex": { "type": "string" },
-                "before_regex": { "type": "string" },
-                "block": { "type": "string" }
-              },
-              "additionalProperties": false
-            },
-            "remove_drivers": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "required": ["regex"],
-                "properties": { "regex": { "type": "string" } },
-                "additionalProperties": false
-              }
-            },
-            "latency_impact_cycles": { "type": "integer", "minimum": 0 }
-          },
-          "additionalProperties": false
-        }
-      },
-      "artifacts": {
-        "type": "object",
-        "required": ["files"],
-        "properties": {
-          "files": {
+        "fixes": {
             "type": "array",
-            "minItems": 1,
             "items": {
-              "type": "object",
-              "required": ["path", "language", "encoding", "content", "ui"],
-              "properties": {
-                "path": { "type": "string", "pattern": ".*\\.sv$" },
-                "language": { "enum": ["verilog"] },
-                "encoding": { "enum": ["utf-8"] },
-                "content": { "type": "string" },
-                "content_base64": { "type": "string" },
-                "ui": {
-                  "type": "object",
-                  "required": ["text"],
-                  "properties": {
-                    "text": { "type": "string" },
-                    "lines": { "type": "array", "items": { "type": "string" } },
-                    "line_start": { "type": "integer", "minimum": 1 }
-                  },
-                  "additionalProperties": false
-                }
-              },
-              "additionalProperties": false
+                "type": "object",
+                "properties": {
+                    "id": {"type": "string"},
+                    "title": {"type": "string"},
+                    "rationale": {"type": "string"},
+                    "where": {
+                        "type": "object",
+                        "properties": {
+                            "file": {"type": "string"},
+                            "anchor_regex": {"type": "string"},
+                            "ports_touched": {
+                                "type": "array",
+                                "items": {"type": "string"}
+                            },
+                            "signals_new": {
+                                "type": "array",
+                                "items": {"type": "string"}
+                            }
+                        },
+                        "required": ["file", "anchor_regex"],
+                        "additionalProperties": False
+                    },
+                    "verilog_patch": {
+                        "type": "object",
+                        "properties": {
+                            "kind": {"type": "string", "enum": ["insert_block", "replace_regex", "append_before_endmodule"]},
+                            "after_regex": {"type": "string"},
+                            "before_regex": {"type": "string"},
+                            "block": {"type": "string"}
+                        },
+                        "required": ["kind", "block"],
+                        "additionalProperties": False
+                    },
+                    "latency_impact_cycles": {"type": "integer"}
+                },
+                "required": ["id", "title", "rationale", "where", "verilog_patch", "latency_impact_cycles"],
+                "additionalProperties": False
             }
-          }
         },
-        "additionalProperties": false
-      },
-      "risks": { "type": "array", "items": { "type": "string" } },
-      "verification": { "type": "array", "items": { "type": "string" } }
+        "artifacts": {
+            "type": "object",
+            "properties": {
+                "top_sv": {
+                    "type": "object",
+                    "properties": {
+                        "path": {"type": "string"},
+                        "language": {"type": "string"},
+                        "encoding": {"type": "string"},
+                        "content": {"type": "string"},
+                        "ui": {
+                            "type": "object",
+                            "properties": {
+                                "text": {"type": "string"}
+                            },
+                            "required": ["text"],
+                            "additionalProperties": False
+                        }
+                    },
+                    "required": ["path", "language", "encoding", "content", "ui"],
+                    "additionalProperties": False
+                }
+            },
+            "required": ["top_sv"],
+            "additionalProperties": False
+        },
+        "risks": {
+            "type": "array",
+            "items": {"type": "string"}
+        },
+        "verification": {
+            "type": "array",
+            "items": {"type": "string"}
+        }
     },
-    "additionalProperties": false
-  }
-  
+    "required": ["summary", "fixes", "artifacts", "risks", "verification"],
+    "additionalProperties": False
+}

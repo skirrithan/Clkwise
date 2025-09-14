@@ -46,10 +46,41 @@
   </div>
 </div>
 
+{% if fix_hints %}
+  <div class="card" style="background: #141414; border-left: 4px solid #176c1a;">
+    <h3>AI Fix Hints</h3>
+    <ul>
+      {% for hint in fix_hints %}
+        <li>{{ hint }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
 <div class="card">
-  <h3>SV Diff (Original vs Generated)</h3>
+  <div style="display: flex; align-items: center; justify-content: space-between;">
+    <h3 style="margin-bottom: 0;">SV Diff (Original vs Generated)</h3>
+    {% if generated_sv_content %}
+      <button id="copy-sv-btn" class="primary" style="margin-left: 12px;">Copy Generated SV</button>
+      <pre id="generated-sv" style="display:none;">{{ generated_sv_content }}</pre>
+    {% endif %}
+  </div>
   <div class="diff">
     {{ diff_html|safe }}
   </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const btn = document.getElementById("copy-sv-btn");
+  if (btn) {
+    btn.addEventListener("click", function() {
+      const sv = document.getElementById("generated-sv").innerText;
+      navigator.clipboard.writeText(sv).then(function() {
+        btn.textContent = "Copied!";
+        setTimeout(() => btn.textContent = "Copy Generated SV", 1200);
+      });
+    });
+  }
+});
+</script>
 {% endblock %}

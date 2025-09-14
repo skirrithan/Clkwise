@@ -4,6 +4,7 @@ from pathlib import Path
 from difflib import HtmlDiff
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, flash
 from werkzeug.utils import secure_filename
+import json
 
 # --- Paths ---
 ROOT = Path(__file__).parent.resolve()
@@ -116,7 +117,27 @@ def upload_and_process():
     except Exception as e:
         diff_html = f"<pre>Diff error: {e}</pre>"
 
+    # ---- Extract fix_hints from LLM_OUTPUT_JSON ----
+    fix_hints = []
+    try:
+        if LLM_OUTPUT_JSON.exists():
+            with open(LLM_OUTPUT_JSON, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                # Try both top-level and nested (for future-proofing)
+                issues = data.get("input", {}).get("issues", [])
+                if issues and isinstance(issues, list):
+                    for issue in issues:
+                        if "fix_hints" in issue:
+                            fix_hints.extend(issue["fix_hints"])
+    except Exception as e:
+        fix_hints = [f"Error loading fix hints: {e}"]
+
     pipeline_ok = step1["ok"] and step2["ok"] and step3["ok"]
+
+    # --- Add this block ---
+    generated_sv_content = None
+    if GENERATED_SV.exists():
+        generated_sv_content = GENERATED_SV.read_text(encoding="utf-8", errors="ignore")
 
     return render_template(
         "result.html",
@@ -127,7 +148,9 @@ def upload_and_process():
         llm_output_json=str(LLM_OUTPUT_JSON.relative_to(ROOT)) if LLM_OUTPUT_JSON.exists() else None,
         generated_sv=str(GENERATED_SV.relative_to(ROOT)) if GENERATED_SV.exists() else None,
         generated_txt=str(GENERATED_TXT.relative_to(ROOT)) if GENERATED_TXT.exists() else None,
-        diff_html=diff_html
+        diff_html=diff_html,
+        fix_hints=fix_hints,
+        generated_sv_content=generated_sv_content  # <-- pass to template
     )
 
 
