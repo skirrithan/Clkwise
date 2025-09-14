@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>CLKWISE AI</h1>
+  <p>Upload a timing report (.rpt) and your Verilog (.sv). We’ll analyze and show fixes + a diff.</p>
+</section>
+
+<form class="card" action="{{ url_for('upload_and_process') }}" method="post" enctype="multipart/form-data">
+  <label class="fileline">
+    <span>Timing Report (.rpt / .txt)</span>
+    <input type="file" name="rpt" required />
+  </label>
+  <label class="fileline">
+    <span>Verilog Source (.sv / .v)</span>
+    <input type="file" name="sv" required />
+  </label>
+  <button class="primary" type="submit">Run Pipeline</button>
+</form>
+{% endblock %}

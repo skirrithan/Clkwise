@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero small">
+  <h2>Pipeline {{ "Succeeded ✅" if pipeline_ok else "Finished with Issues ⚠️" }}</h2>
+  <p>{{ sv_name }} vs. generated fixes</p>
+</section>
+
+<div class="grid">
+  <div class="card">
+    <h3>Step 1 — Ingest RPT → LLM JSON</h3>
+    <p>Status: {{ "OK" if step1.ok else "FAIL" }}</p>
+    {% if llm_input_json %}
+      <a href="{{ url_for('download', relpath=llm_input_json) }}">Download LLM Input JSON</a>
+    {% endif %}
+    <details><summary>Logs</summary>
+      <pre>{{ step1.stdout or "(no stdout)" }}</pre>
+      {% if step1.stderr %}<pre class="err">{{ step1.stderr }}</pre>{% endif %}
+    </details>
+  </div>
+
+  <div class="card">
+    <h3>Step 2 — LLM → cerebras_out.json</h3>
+    <p>Status: {{ "OK" if step2.ok else "FAIL" }}</p>
+    {% if llm_output_json %}
+      <a href="{{ url_for('download', relpath=llm_output_json) }}">Download LLM Output JSON</a>
+    {% endif %}
+    <details><summary>Logs</summary>
+      <pre>{{ step2.stdout or "(no stdout)" }}</pre>
+      {% if step2.stderr %}<pre class="err">{{ step2.stderr }}</pre>{% endif %}
+    </details>
+  </div>
+
+  <div class="card">
+    <h3>Step 3 — Extract SV Artifacts</h3>
+    <p>Status: {{ "OK" if step3.ok else "FAIL" }}</p>
+    {% if generated_sv %}
+      <a href="{{ url_for('download', relpath=generated_sv) }}">Download Generated SV</a>
+    {% endif %}
+    {% if generated_txt %}
+      · <a href="{{ url_for('download', relpath=generated_txt) }}">Download Notes (txt)</a>
+    {% endif %}
+    <details><summary>Logs</summary>
+      <pre>{{ step3.stdout or "(no stdout)" }}</pre>
+      {% if step3.stderr %}<pre class="err">{{ step3.stderr }}</pre>{% endif %}
+    </details>
+  </div>
+</div>
+
+<div class="card">
+  <h3>SV Diff (Original vs Generated)</h3>
+  <div class="diff">
+    {{ diff_html|safe }}
+  </div>
+</div>
+{% endblock %}
