@@ -108,7 +108,7 @@ def bundle_verilog(files: List[Path]) -> str:
     return blob[:MAX_VERILOG_CHARS]
 
 def get_client() -> Cerebras:
-    api_key = os.environ.get("CER_API_KEY")
+    api_key = os.getenv("CEREBRAS_API_KEY")
     if not api_key:
         print("ERROR: CEREBRAS_API_KEY not set.", file=sys.stderr)
         sys.exit(1)
