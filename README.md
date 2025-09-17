@@ -4,6 +4,8 @@
 Devpost: https://devpost.com/software/clkwise
 
 ---
+<img width="806" height="369" alt="image" src="https://github.com/user-attachments/assets/f1389214-7dc4-4e93-8f38-ed6fcb684f0c" />
+
 
 ## The Problem
 
