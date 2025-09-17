@@ -1,6 +1,7 @@
 # Clkwise: AI-Powered FPGA Timing Debugger
 
 *Revolutionizing chip design with intelligent timing closure*
+Devpost: https://devpost.com/software/clkwise
 
 ---
 
@@ -193,6 +194,7 @@ ClkWise
 
 4. **Open local link via web browser**   
    Open your web browser and navigate to the local app link (e.g., http://127.0.0.1:5000).
+   
    **Usage Steps:**
    1. Upload your HDL and timing report files.
    2. Click 'Run Analysis' to start the AI-powered timing optimization.
