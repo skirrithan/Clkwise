@@ -67,7 +67,6 @@ Routing Delay: 65%
 
 ### Processing: Dual AI Analysis
 1. **Cerebras** (~150ms): Identifies deep logic + routing issues
-2. **Cohere** (~300ms): Synthesizes comprehensive fix strategy  
 3. **Validation** (~50ms): Expert heuristics verify suggestions
 
 ### Output: Actionable Insights
@@ -119,28 +118,6 @@ Confidence: 82% | Processing: ~500ms | Expected WNS: +0.5ns
 
 ---
 
-## Technical Roadmap
-
-### **Phase 1** (Current): Core Platform
-- Dual AI analysis pipeline (Cerebras + Cohere)
-- Web interface with file upload and results display
-- Expert heuristics validation system
-- RESTful API with confidence scoring
-
-### **Phase 2** (Next 30 days): Multi-Platform Integration
-- Groq deployment for ultra-low latency
-- Enhanced Cerebras integration
-
-### **Phase 3** (90 days): Advanced Intelligence
-- Custom fine-tuned models on timing-specific data
-- Predictive timing analysis before synthesis
-- Automated fix implementation and verification
-- Integration with major EDA toolchains (Vivado, Quartus, Synopsys)
-
----
-
-## Why We'll Win
-
 ### **Technical Excellence**
 - **Production-ready architecture** with comprehensive error handling
 - **Dual AI validation** ensures both speed AND accuracy
@@ -173,6 +150,25 @@ We're transforming the most time-intensive part of chip development from a **man
 
 ---
 
+## Project Stucture
+ClkWise
+├── Makefile
+├── README.md
+├── app.py
+├── backend
+│   ├── Makefile
+│   ├── app
+│   ├── data
+│   ├── hw
+│   └── requirements.txt
+├── docs
+│   └── ARCHITECTURE.md
+└── frontend2
+    ├── base.html
+    ├── index.html
+    ├── result.html
+    └── static
+
 ## References
 
 ¹ Xilinx UltraFast Design Methodology Guide (UG949), Chapter 4: "Timing Closure"
@@ -192,3 +188,22 @@ We're transforming the most time-intensive part of chip development from a **man
 ---
 
 *Ready to see the future of chip design? Let's make timing closure intelligent.*
+
+---
+
+## CLKWISE TECHNICAL OVERVIEW
+
+CLKWISE is an AI-powered FPGA timing analysis and optimization platform that works in three stages:
+
+1. RPT INGESTION: Parses timing report files (.rpt) and converts timing violations into structured JSON
+   Command: python3 backend/app/ingest/run_pipeline.py [RPT_FILE]
+
+2. AI OPTIMIZATION: Leverages Cerebras LLM to analyze both SystemVerilog code and timing data
+   to generate optimized HDL with strategic pipeline registers and logic restructuring
+   Command: python3 backend/app/llm_integration/cerebras_int_no_schema.py --timing [JSON] --verilog [SV] --out [JSON]
+
+3. ARTIFACT EXTRACTION: Extracts optimized SystemVerilog and documentation from AI output
+   Command: python3 backend/data/frontend_data/scripts/extract_sv_artifacts.py [JSON] --sv [OUT_SV] --txt [OUT_TXT]
+
+The frontend presents an interactive diff visualization showing exactly what changes were made to fix
+timing violations, with navigation tools to explore the improvements between original and optimized code.
