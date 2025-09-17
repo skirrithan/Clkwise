@@ -151,6 +151,7 @@ We're transforming the most time-intensive part of chip development from a **man
 ---
 
 ## Project Stucture
+```
 ClkWise
 ├── Makefile
 ├── README.md
@@ -168,7 +169,7 @@ ClkWise
     ├── index.html
     ├── result.html
     └── static
-
+```
 ## References
 
 ¹ Xilinx UltraFast Design Methodology Guide (UG949), Chapter 4: "Timing Closure"
