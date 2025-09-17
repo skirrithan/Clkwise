@@ -1,6 +1,0 @@
-# Flask web framework
-flask==2.3.3
-flask-cors==4.0.0
-
-# AI/ML APIs
-cohere==4.32.0
