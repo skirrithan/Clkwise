@@ -31,8 +31,8 @@ ALLOWED_SV = {".sv", ".v"}
 # point Flask at your custom template/static locations
 app = Flask(
     __name__,
-    template_folder="frontend2",           # base.html, index.html, result.html live here
-    static_folder="frontend2/static"       # /static/style.css lives here
+    template_folder="frontend",           # base.html, index.html, result.html live here
+    static_folder="frontend/static"       # /static/style.css lives here
 )
 app.secret_key = "dev"  # change in prod
 
