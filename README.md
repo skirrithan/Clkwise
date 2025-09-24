@@ -8,8 +8,8 @@ Devpost: https://devpost.com/software/clkwise
 ---
 
 ## Demo Video
----
-https://github.com/user-attachments/assets/453aeabb-c8a1-475c-8669-b44d9a91782e
+[![Watch the demo](https://github.com/user-attachments/assets/f1389214-7dc4-4e93-8f38-ed6fcb684f0c)](https://github.com/user-attachments/assets/453aeabb-c8a1-475c-8669-b44d9a91782e)
+
 ---
 
 
