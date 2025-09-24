@@ -5,6 +5,14 @@ Devpost: https://devpost.com/software/clkwise
 
 ---
 <img width="806" height="369" alt="image" src="https://github.com/user-attachments/assets/f1389214-7dc4-4e93-8f38-ed6fcb684f0c" />
+---
+
+## Demo Video
+---
+https://github.com/user-attachments/assets/453aeabb-c8a1-475c-8669-b44d9a91782e
+---
+
+
 
 ## DEBUG STEP
 <img width="1533" height="849" alt="image" src="https://github.com/user-attachments/assets/6cfb0d47-cf98-411e-9c2f-3be9a5e12cdc" />
